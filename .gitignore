@@ -1,0 +1,27 @@
+# Dependencies
+/backend/vendor/
+/frontend/node_modules/
+
+# Environment
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Build output
+/frontend/dist/
+/backend/var/
+
+# JWT keys
+/backend/config/jwt/*.pem
