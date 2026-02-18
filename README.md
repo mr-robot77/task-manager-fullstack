@@ -1,4 +1,4 @@
-# Production Line Device Management System Project
+# Production Line Task Management System Project
 
 ## Overview
 
@@ -8,15 +8,15 @@ This project implements . The goal is to . The project is designed for .
 
 ```none
 .
-├── symfony-angular-device/
-│   └── backend/              # Symfony Project
+├── task-manager/
+│   └── backend/              # PHP Symfony API Project
 |       ├── Dockerfile
 |       ├── composer.json
 |       ├── src/
 |       ├── config/
 |       └── .env
 |
-├── frontend/                # Angular Project
+├── frontend/                # Angular App Project
 |       ├── Dockerfile
 |       ├── package.json
 |       └── src/
