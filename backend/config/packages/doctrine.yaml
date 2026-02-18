@@ -6,6 +6,8 @@ doctrine:
         dbname: '%env(DB_NAME)%'
         user: '%env(DB_USER)%'
         password: '%env(DB_PASSWORD)%'
+        options:
+            TrustServerCertificate: true
         server_version: '2022'
 
     orm:

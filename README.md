@@ -11,6 +11,7 @@ A full-stack web application for managing production line tasks in semiconductor
 | Frontend   | Angular 17+, TypeScript, Material   |
 | Backend    | PHP 8.2, Symfony 7.2                |
 | Database   | Microsoft SQL Server 2022           |
+| Dashboard  | Streamlit (Python)                  |
 | Container  | Docker, Docker Compose              |
 | CI/CD      | GitHub Actions                      |
 
@@ -19,7 +20,7 @@ A full-stack web application for managing production line tasks in semiconductor
 - JWT-based authentication (register / login)
 - Full CRUD operations for production tasks
 - Filter tasks by status, priority, and production line
-- Dashboard with real-time statistics
+- Realtime dashboard built with Streamlit
 - Responsive Material Design UI
 - Fully containerized with Docker Compose
 - Automated CI/CD pipeline with GitHub Actions
@@ -43,13 +44,14 @@ Access the application:
 
 - **Frontend**: <http://localhost:4200>
 - **Backend API**: <http://localhost:8000/api>
+- **Streamlit Dashboard**: <http://localhost:8501>
 - **MSSQL**: `localhost:1433`
 
 ### Initialize Database
 
 ```bash
-docker compose exec backend php bin/console doctrine:database:create
-docker compose exec backend php bin/console doctrine:schema:create
+docker compose exec backend php bin/console doctrine:database:create --if-not-exists
+docker compose exec backend php bin/console doctrine:schema:update --force
 ```
 
 ### Generate JWT Keys
@@ -57,6 +59,14 @@ docker compose exec backend php bin/console doctrine:schema:create
 ```bash
 docker compose exec backend php bin/console lexik:jwt:generate-keypair
 ```
+
+### Realtime Streamlit Dashboard
+
+The Streamlit service is part of `docker compose up --build` and reads data from:
+
+- `GET /api/tasks/statistics`
+
+You can tune refresh speed using `STREAMLIT_REFRESH_SECONDS` in `docker-compose.yml`.
 
 ## API Endpoints
 
@@ -99,6 +109,11 @@ docker compose exec backend php bin/console lexik:jwt:generate-keypair
 │   │   │   └── interceptors/   # HTTP interceptors
 │   ├── Dockerfile
 │   └── package.json
+│
+├── streamlit-dashboard/        # Realtime Streamlit dashboard
+│   ├── app.py
+│   ├── requirements.txt
+│   └── Dockerfile
 │
 ├── docker-compose.yml          # Multi-container orchestration
 ├── .github/workflows/ci.yml    # CI/CD pipeline
