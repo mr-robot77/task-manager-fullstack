@@ -157,6 +157,9 @@ npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 ## Coverage
 
 - Backend and frontend coverage reports are generated in CI on every push.
+- CI also runs a Docker smoke test that boots `database`, `backend`, and `dashboard`, then checks:
+  - `GET /api/tasks/statistics`
+  - `http://localhost:8501/_stcore/health`
 - You can download reports from workflow artifacts:
   - `backend-coverage` (`backend-clover.xml`)
   - `frontend-coverage` (`lcov.info`, HTML report, Cobertura XML)
