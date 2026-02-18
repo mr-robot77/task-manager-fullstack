@@ -27,6 +27,10 @@ jobs:
         working-directory: ./backend
         run: find src -name "*.php" -exec php -l {} \;
 
+      - name: Run backend tests
+        working-directory: ./backend
+        run: php bin/phpunit --testdox
+
   frontend-build:
     runs-on: ubuntu-latest
     steps:
@@ -44,6 +48,10 @@ jobs:
       - name: Run linting
         working-directory: ./frontend
         run: npm run lint
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessNoSandbox
 
       - name: Build production
         working-directory: ./frontend

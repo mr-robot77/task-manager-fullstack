@@ -1,5 +1,7 @@
 # Production Line Task Manager
 
+[![CI/CD Pipeline](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml)
+
 A full-stack web application for managing production line tasks in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 
 ## Tech Stack
@@ -38,9 +40,10 @@ docker compose up --build
 ```
 
 Access the application:
-- **Frontend**: http://localhost:4200
-- **Backend API**: http://localhost:8000/api
-- **MSSQL**: localhost:1433
+
+- **Frontend**: <http://localhost:4200>
+- **Backend API**: <http://localhost:8000/api>
+- **MSSQL**: `localhost:1433`
 
 ### Initialize Database
 
@@ -77,7 +80,7 @@ docker compose exec backend php bin/console lexik:jwt:generate-keypair
 
 ## Project Structure
 
-```
+```text
 .
 ├── backend/                    # Symfony PHP API
 │   ├── src/
@@ -118,6 +121,22 @@ php bin/console server:start
 cd frontend
 npm install
 ng serve
+```
+
+## Testing
+
+### Backend tests
+
+```bash
+cd backend
+php bin/phpunit --testdox
+```
+
+### Frontend tests
+
+```bash
+cd frontend
+npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 ```
 
 ## License
