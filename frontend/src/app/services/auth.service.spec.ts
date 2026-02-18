@@ -9,6 +9,10 @@ describe('AuthService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7609/ingest/e8709f53-640d-40fa-9064-c7258dc3c672',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3fd26b'},body:JSON.stringify({sessionId:'3fd26b',runId:'coverage-pre',hypothesisId:'H1',location:'frontend/src/app/services/auth.service.spec.ts:12',message:'AuthService test beforeEach executed',data:{hasFetch:typeof fetch === 'function'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
     localStorage.clear();
 
     TestBed.configureTestingModule({
@@ -29,6 +33,10 @@ describe('AuthService', () => {
   });
 
   it('stores token after login', () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7609/ingest/e8709f53-640d-40fa-9064-c7258dc3c672',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3fd26b'},body:JSON.stringify({sessionId:'3fd26b',runId:'coverage-pre',hypothesisId:'H3',location:'frontend/src/app/services/auth.service.spec.ts:34',message:'AuthService login test running',data:{targetUrl:'http://localhost:8000/api/login_check'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
     service.login('user@example.com', 'secret').subscribe((response) => {
       expect(response.token).toBe('jwt-token');
       expect(service.getToken()).toBe('jwt-token');

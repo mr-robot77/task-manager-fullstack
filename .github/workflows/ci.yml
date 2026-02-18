@@ -17,6 +17,7 @@ jobs:
         with:
           php-version: '8.2'
           extensions: intl
+          coverage: xdebug
           tools: composer
 
       - name: Install dependencies
@@ -29,7 +30,15 @@ jobs:
 
       - name: Run backend tests
         working-directory: ./backend
-        run: php vendor/bin/phpunit --testdox
+        run: |
+          mkdir -p coverage
+          php vendor/bin/phpunit --testdox --coverage-clover coverage/backend-clover.xml
+
+      - name: Upload backend coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/backend-clover.xml
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -51,7 +60,13 @@ jobs:
 
       - name: Run frontend tests
         working-directory: ./frontend
-        run: npm run test -- --watch=false --no-progress --browsers=ChromeHeadlessNoSandbox
+        run: npm run test:ci
+
+      - name: Upload frontend coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/task-manager-frontend
 
       - name: Build production
         working-directory: ./frontend

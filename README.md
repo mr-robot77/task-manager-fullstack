@@ -129,7 +129,7 @@ ng serve
 
 ```bash
 cd backend
-php bin/phpunit --testdox
+php vendor/bin/phpunit --testdox
 ```
 
 ### Frontend tests
@@ -138,6 +138,13 @@ php bin/phpunit --testdox
 cd frontend
 npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 ```
+
+## Coverage
+
+- Backend and frontend coverage reports are generated in CI on every push.
+- You can download reports from workflow artifacts:
+  - `backend-coverage` (`backend-clover.xml`)
+  - `frontend-coverage` (`lcov.info`, HTML report, Cobertura XML)
 
 ## License
 
