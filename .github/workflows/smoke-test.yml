@@ -1,0 +1,57 @@
+name: Smoke Test Dashboard
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Streamlit Dashboard Docker Image
+        run: docker build -t task-manager-dashboard ./streamlit-dashboard
+
+      - name: Start backend stack for smoke test
+        run: docker compose up --build -d database backend dashboard
+
+      - name: Prepare backend database for smoke test
+        run: |
+          docker compose exec -T backend php bin/console doctrine:database:create --if-not-exists
+          docker compose exec -T backend php bin/console doctrine:schema:update --force
+          docker compose exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
+
+      - name: Smoke test backend statistics endpoint
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8000/api/tasks/statistics >/tmp/backend_stats.json; then
+              break
+            fi
+            sleep 2
+          done
+          test -s /tmp/backend_stats.json
+          cat /tmp/backend_stats.json
+
+      - name: Smoke test Streamlit dashboard health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8501/_stcore/health; then
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Print service logs on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs backend --tail 100
+          docker compose logs dashboard --tail 100
+
+      - name: Stop smoke test stack
+        if: always()
+        run: docker compose down -v

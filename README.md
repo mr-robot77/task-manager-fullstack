@@ -1,6 +1,7 @@
 # Production Line Task Manager
 
 [![CI/CD Pipeline](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml)
+[![Smoke Test Dashboard](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml)
 
 A full-stack web application for managing production line tasks in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 
@@ -157,7 +158,7 @@ npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 ## Coverage
 
 - Backend and frontend coverage reports are generated in CI on every push.
-- CI also runs a Docker smoke test that boots `database`, `backend`, and `dashboard`, then checks:
+- Dedicated `Smoke Test Dashboard` workflow runs a Docker smoke test that boots `database`, `backend`, and `dashboard`, then checks:
   - `GET /api/tasks/statistics`
   - `http://localhost:8501/_stcore/health`
 - You can download reports from workflow artifacts:
