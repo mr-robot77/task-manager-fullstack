@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Equipment;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TaskRepository;
@@ -81,6 +82,14 @@ class TaskController extends AbstractController
             $task->setDueDate(new \DateTime($data['dueDate']));
         }
 
+        if (isset($data['equipmentId'])) {
+            $equipment = $this->entityManager->getRepository(Equipment::class)->find($data['equipmentId']);
+            if (! $equipment) {
+                return $this->json(['error' => 'Equipment not found'], 404);
+            }
+            $task->setEquipment($equipment);
+        }
+
         $assignedToId = $data['assignedTo'] ?? null;
         if ($assignedToId) {
             $user = $this->entityManager->getRepository(User::class)->find($assignedToId);
@@ -139,6 +148,17 @@ class TaskController extends AbstractController
             $user = $this->entityManager->getRepository(User::class)->find($data['assignedTo']);
             if ($user) {
                 $task->setAssignedTo($user);
+            }
+        }
+        if (array_key_exists('equipmentId', $data)) {
+            if ($data['equipmentId'] === null || $data['equipmentId'] === '') {
+                $task->setEquipment(null);
+            } else {
+                $equipment = $this->entityManager->getRepository(Equipment::class)->find($data['equipmentId']);
+                if (! $equipment) {
+                    return $this->json(['error' => 'Equipment not found'], 404);
+                }
+                $task->setEquipment($equipment);
             }
         }
 

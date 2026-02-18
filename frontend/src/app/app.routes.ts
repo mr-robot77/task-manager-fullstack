@@ -23,6 +23,21 @@ export const routes: Routes = [
       import('./components/task-form/task-form.component').then(m => m.TaskFormComponent)
   },
   {
+    path: 'equipment',
+    loadComponent: () =>
+      import('./components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent)
+  },
+  {
+    path: 'equipment/new',
+    loadComponent: () =>
+      import('./components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent)
+  },
+  {
+    path: 'equipment/:id/edit',
+    loadComponent: () =>
+      import('./components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent)
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./components/login/login.component').then(m => m.LoginComponent)

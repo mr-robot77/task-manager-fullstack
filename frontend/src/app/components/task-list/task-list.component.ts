@@ -70,6 +70,12 @@ import { Task, TaskService, TaskFilters } from '../../services/task.service';
         <th mat-header-cell *matHeaderCellDef>Line</th>
         <td mat-cell *matCellDef="let task">{{ task.productionLine }}</td>
       </ng-container>
+      <ng-container matColumnDef="equipment">
+        <th mat-header-cell *matHeaderCellDef>Equipment</th>
+        <td mat-cell *matCellDef="let task">
+          {{ task.equipment ? (task.equipment.code + ' - ' + task.equipment.name) : '-' }}
+        </td>
+      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let task">
@@ -103,7 +109,7 @@ import { Task, TaskService, TaskFilters } from '../../services/task.service';
 export class TaskListComponent implements OnInit {
   tasks: Task[] = [];
   filters: TaskFilters = {};
-  displayedColumns = ['title', 'status', 'priority', 'productionLine', 'actions'];
+  displayedColumns = ['title', 'status', 'priority', 'productionLine', 'equipment', 'actions'];
 
   constructor(private taskService: TaskService, private snackBar: MatSnackBar) {}
 

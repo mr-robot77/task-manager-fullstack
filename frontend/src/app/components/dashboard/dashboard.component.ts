@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TaskService, TaskStatistics } from '../../services/task.service';
+import { EquipmentService, EquipmentStatistics } from '../../services/equipment.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -62,6 +63,45 @@ import { TaskService, TaskStatistics } from '../../services/task.service';
         </mat-card>
       }
     </div>
+
+    <h2>Equipment Overview</h2>
+    <div class="stats-grid">
+      <mat-card class="stat-card total">
+        <mat-card-content>
+          <mat-icon>precision_manufacturing</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ equipmentStats?.total || 0 }}</span>
+            <span class="stat-label">Total Equipment</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @for (e of equipmentStats?.byStatus; track e.status) {
+        <mat-card class="stat-card" [class]="'equipment-' + e.status">
+          <mat-card-content>
+            <div class="stat-info">
+              <span class="stat-number">{{ e.count }}</span>
+              <span class="stat-label">{{ formatLabel(e.status) }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <h2>Equipment by Type</h2>
+    <div class="stats-grid">
+      @for (t of equipmentStats?.byType; track t.type) {
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <mat-icon>memory</mat-icon>
+            <div class="stat-info">
+              <span class="stat-number">{{ t.count }}</span>
+              <span class="stat-label">{{ t.type | uppercase }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
   `,
   styles: [`
     .stats-grid {
@@ -85,18 +125,28 @@ import { TaskService, TaskStatistics } from '../../services/task.service';
     .priority-high { border-left: 4px solid #ff9800; }
     .priority-medium { border-left: 4px solid #2196f3; }
     .priority-low { border-left: 4px solid #4caf50; }
+    .equipment-available { border-left: 4px solid #4caf50; }
+    .equipment-in_use { border-left: 4px solid #2196f3; }
+    .equipment-maintenance { border-left: 4px solid #ff9800; }
+    .equipment-offline { border-left: 4px solid #f44336; }
     mat-icon { font-size: 32px; width: 32px; height: 32px; color: #1976d2; }
   `]
 })
 export class DashboardComponent implements OnInit {
   stats: TaskStatistics | null = null;
+  equipmentStats: EquipmentStatistics | null = null;
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private equipmentService: EquipmentService) {}
 
   ngOnInit(): void {
     this.taskService.getStatistics().subscribe({
       next: (data) => this.stats = data,
       error: (err) => console.error('Failed to load statistics', err)
+    });
+
+    this.equipmentService.getStatistics().subscribe({
+      next: (data) => this.equipmentStats = data,
+      error: (err) => console.error('Failed to load equipment statistics', err)
     });
   }
 

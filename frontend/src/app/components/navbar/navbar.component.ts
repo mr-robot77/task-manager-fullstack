@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <mat-toolbar color="primary">
       <mat-icon>factory</mat-icon>
-      <span style="margin-left: 8px">Task Manager</span>
+      <span style="margin-left: 8px">Operations Manager</span>
       <span style="flex: 1"></span>
 
       <a mat-button routerLink="/dashboard" routerLinkActive="active-link">
@@ -21,6 +21,9 @@ import { AuthService } from '../../services/auth.service';
       </a>
       <a mat-button routerLink="/tasks" routerLinkActive="active-link">
         <mat-icon>list</mat-icon> Tasks
+      </a>
+      <a mat-button routerLink="/equipment" routerLinkActive="active-link">
+        <mat-icon>precision_manufacturing</mat-icon> Equipment
       </a>
 
       @if (isLoggedIn$ | async) {

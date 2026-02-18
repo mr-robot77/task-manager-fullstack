@@ -1,9 +1,9 @@
-# Production Line Task Manager
+# Production Line Task and Equipment Manager
 
 [![CI/CD Pipeline](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml)
-[![Smoke Test Dashboard](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml)
+[![Smoke Test API](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml)
 
-A full-stack web application for managing production line tasks in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
+A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 
 ## Tech Stack
 
@@ -12,7 +12,6 @@ A full-stack web application for managing production line tasks in semiconductor
 | Frontend   | Angular 17+, TypeScript, Material   |
 | Backend    | PHP 8.2, Symfony 7.2                |
 | Database   | Microsoft SQL Server 2022           |
-| Dashboard  | Streamlit (Python)                  |
 | Container  | Docker, Docker Compose              |
 | CI/CD      | GitHub Actions                      |
 
@@ -20,8 +19,10 @@ A full-stack web application for managing production line tasks in semiconductor
 
 - JWT-based authentication (register / login)
 - Full CRUD operations for production tasks
+- Full CRUD operations for production equipment
+- Link tasks with equipment units
 - Filter tasks by status, priority, and production line
-- Realtime dashboard built with Streamlit
+- Operational dashboard in Angular
 - Responsive Material Design UI
 - Fully containerized with Docker Compose
 - Automated CI/CD pipeline with GitHub Actions
@@ -45,7 +46,6 @@ Access the application:
 
 - **Frontend**: <http://localhost:4200>
 - **Backend API**: <http://localhost:8000/api>
-- **Streamlit Dashboard**: <http://localhost:8501>
 - **MSSQL**: `localhost:1433`
 
 ### Initialize Database
@@ -61,14 +61,6 @@ docker compose exec backend php bin/console doctrine:schema:update --force
 docker compose exec backend php bin/console lexik:jwt:generate-keypair
 ```
 
-### Realtime Streamlit Dashboard
-
-The Streamlit service is part of `docker compose up --build` and reads data from:
-
-- `GET /api/tasks/statistics`
-
-You can tune refresh speed using `STREAMLIT_REFRESH_SECONDS` in `docker-compose.yml`.
-
 ## API Endpoints
 
 | Method | Endpoint                    | Auth     | Description          |
@@ -82,11 +74,23 @@ You can tune refresh speed using `STREAMLIT_REFRESH_SECONDS` in `docker-compose.
 | PUT    | `/api/tasks/{id}`           | Required | Update a task        |
 | DELETE | `/api/tasks/{id}`           | Required | Delete a task        |
 | GET    | `/api/tasks/statistics`     | Public   | Dashboard statistics |
+| GET    | `/api/equipment`            | Required | List equipment (filterable) |
+| POST   | `/api/equipment`            | Required | Create equipment     |
+| GET    | `/api/equipment/{id}`       | Required | Get equipment details |
+| PUT    | `/api/equipment/{id}`       | Required | Update equipment     |
+| DELETE | `/api/equipment/{id}`       | Required | Delete equipment     |
+| GET    | `/api/equipment/statistics` | Public   | Equipment statistics |
 
 ### Query Parameters for Task List
 
 - `status`: `todo`, `in_progress`, `review`, `done`
 - `priority`: `low`, `medium`, `high`, `critical`
+- `productionLine`: production line name
+
+### Query Parameters for Equipment List
+
+- `status`: `available`, `in_use`, `maintenance`, `offline`
+- `type`: `machine`, `robot`, `conveyor`, `sensor`, `tooling`
 - `productionLine`: production line name
 
 ## Project Structure
@@ -106,15 +110,10 @@ You can tune refresh speed using `STREAMLIT_REFRESH_SECONDS` in `docker-compose.
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/     # UI components
-│   │   │   ├── services/       # API services
+│   │   │   ├── services/       # Task and equipment API services
 │   │   │   └── interceptors/   # HTTP interceptors
 │   ├── Dockerfile
 │   └── package.json
-│
-├── streamlit-dashboard/        # Realtime Streamlit dashboard
-│   ├── app.py
-│   ├── requirements.txt
-│   └── Dockerfile
 │
 ├── docker-compose.yml          # Multi-container orchestration
 ├── .github/workflows/ci.yml    # CI/CD pipeline
@@ -158,9 +157,9 @@ npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 ## Coverage
 
 - Backend and frontend coverage reports are generated in CI on every push.
-- Dedicated `Smoke Test Dashboard` workflow runs a Docker smoke test that boots `database`, `backend`, and `dashboard`, then checks:
+- Dedicated `Smoke Test API` workflow runs on push, pull request, and daily schedule to boot `database` and `backend`, then checks:
   - `GET /api/tasks/statistics`
-  - `http://localhost:8501/_stcore/health`
+  - `GET /api/equipment/statistics`
 - You can download reports from workflow artifacts:
   - `backend-coverage` (`backend-clover.xml`)
   - `frontend-coverage` (`lcov.info`, HTML report, Cobertura XML)

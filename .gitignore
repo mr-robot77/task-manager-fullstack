@@ -22,8 +22,6 @@ docker-compose.override.yml
 # Build output
 /frontend/dist/
 /backend/var/
-/streamlit-dashboard/__pycache__/
-/streamlit-dashboard/.streamlit/
 
 # JWT keys
 /backend/config/jwt/*.pem

@@ -41,6 +41,11 @@ class Task
     #[Groups(['task:read', 'task:write'])]
     private ?string $productionLine = null;
 
+    #[ORM\ManyToOne(targetEntity: Equipment::class, inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Groups(['task:read'])]
+    private ?Equipment $equipment = null;
+
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['task:read'])]
@@ -127,6 +132,17 @@ class Task
     public function getAssignedTo(): ?User
     {
         return $this->assignedTo;
+    }
+
+    public function getEquipment(): ?Equipment
+    {
+        return $this->equipment;
+    }
+
+    public function setEquipment(?Equipment $equipment): static
+    {
+        $this->equipment = $equipment;
+        return $this;
     }
 
     public function setAssignedTo(?User $assignedTo): static

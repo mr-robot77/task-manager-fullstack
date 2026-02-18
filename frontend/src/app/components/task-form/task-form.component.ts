@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Task, TaskService } from '../../services/task.service';
+import { Equipment, EquipmentService } from '../../services/equipment.service';
 
 @Component({
   selector: 'app-task-form',
@@ -72,6 +73,16 @@ import { Task, TaskService } from '../../services/task.service';
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Assigned Equipment (Optional)</mat-label>
+            <mat-select [(ngModel)]="task.equipmentId" name="equipmentId">
+              <mat-option [value]="null">None</mat-option>
+              @for (item of equipmentOptions; track item.id) {
+                <mat-option [value]="item.id">{{ item.code }} - {{ item.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Due Date</mat-label>
             <input matInput [matDatepicker]="picker" [(ngModel)]="task.dueDate" name="dueDate">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
@@ -100,26 +111,33 @@ import { Task, TaskService } from '../../services/task.service';
 export class TaskFormComponent implements OnInit {
   task: Partial<Task> = {
     title: '', description: '', status: 'todo',
-    priority: 'medium', productionLine: ''
+    priority: 'medium', productionLine: '', equipmentId: null
   };
+  equipmentOptions: Equipment[] = [];
   isEdit = false;
   loading = false;
   private taskId: number | null = null;
 
   constructor(
     private taskService: TaskService,
+    private equipmentService: EquipmentService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
+    this.loadEquipmentOptions();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
       this.taskId = +id;
       this.taskService.getTask(this.taskId).subscribe({
-        next: (task) => this.task = task,
+        next: (task) => this.task = {
+          ...task,
+          equipmentId: task.equipment?.id ?? null
+        },
         error: () => this.snackBar.open('Task not found', 'Close', { duration: 3000 })
       });
     }
@@ -148,5 +166,12 @@ export class TaskFormComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/tasks']);
+  }
+
+  private loadEquipmentOptions(): void {
+    this.equipmentService.getEquipmentList().subscribe({
+      next: (items) => this.equipmentOptions = items,
+      error: () => this.snackBar.open('Failed to load equipment options', 'Close', { duration: 3000 })
+    });
   }
 }

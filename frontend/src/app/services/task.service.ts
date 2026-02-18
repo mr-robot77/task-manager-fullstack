@@ -10,6 +10,15 @@ export interface Task {
   status: 'todo' | 'in_progress' | 'review' | 'done';
   priority: 'low' | 'medium' | 'high' | 'critical';
   productionLine: string;
+  equipmentId?: number | null;
+  equipment?: {
+    id: number;
+    name: string;
+    code: string;
+    type: string;
+    status: string;
+    productionLine: string;
+  } | null;
   assignedTo?: {
     id: number;
     email: string;

@@ -1,10 +1,13 @@
-name: Smoke Test Dashboard
+name: Smoke Test API
 
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   smoke-test:
@@ -13,11 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Streamlit Dashboard Docker Image
-        run: docker build -t task-manager-dashboard ./streamlit-dashboard
-
       - name: Start backend stack for smoke test
-        run: docker compose up --build -d database backend dashboard
+        run: docker compose up --build -d database backend
 
       - name: Prepare backend database for smoke test
         run: |
@@ -36,21 +36,22 @@ jobs:
           test -s /tmp/backend_stats.json
           cat /tmp/backend_stats.json
 
-      - name: Smoke test Streamlit dashboard health
+      - name: Smoke test equipment statistics endpoint
         run: |
           for i in {1..30}; do
-            if curl -fsS http://localhost:8501/_stcore/health; then
+            if curl -fsS http://localhost:8000/api/equipment/statistics >/tmp/equipment_stats.json; then
               break
             fi
             sleep 2
           done
+          test -s /tmp/equipment_stats.json
+          cat /tmp/equipment_stats.json
 
       - name: Print service logs on failure
         if: failure()
         run: |
           docker compose ps
           docker compose logs backend --tail 100
-          docker compose logs dashboard --tail 100
 
       - name: Stop smoke test stack
         if: always()
