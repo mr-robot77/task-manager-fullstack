@@ -30,7 +30,20 @@ python app.py
 
 Then open: <http://localhost:7860>
 
-## Backend configuration
+## Deploy to Hugging Face (one command)
+
+From the project root, with a valid HF token:
+
+```powershell
+# Get token from https://huggingface.co/settings/tokens
+$env:HF_TOKEN = "hf_xxxxxxxx"
+pip install huggingface_hub
+python hf-dashboard/deploy_to_hf.py
+```
+
+This uploads `README.md`, `app.py`, `requirements.txt`, sets `BACKEND_API_BASE`, and restarts the Space.
+
+## Backend configuration (manual)
 
 In **Settings → Variables and secrets**, add:
 
