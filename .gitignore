@@ -5,6 +5,7 @@
 # Environment
 .env.local
 .env.*.local
+/deploy/oracle/.env.prod
 
 # IDE
 .idea/
@@ -23,6 +24,11 @@ docker-compose.override.yml
 # Build output
 /frontend/dist/
 /backend/var/
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
 
 # JWT keys
 /backend/config/jwt/*.pem
