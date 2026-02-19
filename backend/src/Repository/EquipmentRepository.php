@@ -48,94 +48,23 @@ class EquipmentRepository extends ServiceEntityRepository
     public function getStatistics(): array
     {
         $conn = $this->getEntityManager()->getConnection();
-        $params = $conn->getParams();
+        $statusCounts = $conn->executeQuery(
+            'SELECT status, COUNT(*) as count FROM equipment GROUP BY status'
+        )->fetchAllAssociative();
 
-        // #region agent log
-        @file_put_contents(
-            '/workspace-root/debug-3fd26b.log',
-            json_encode([
-                'sessionId' => '3fd26b',
-                'runId' => 'pre-fix',
-                'hypothesisId' => 'H2',
-                'location' => 'backend/src/Repository/EquipmentRepository.php::getStatistics',
-                'message' => 'Equipment statistics query starting',
-                'data' => [
-                    'driver' => $params['driver'] ?? null,
-                    'host' => $params['host'] ?? null,
-                    'port' => $params['port'] ?? null,
-                    'dbname' => $params['dbname'] ?? null,
-                    'pdoSqlsrvLoaded' => extension_loaded('pdo_sqlsrv'),
-                    'sqlsrvLoaded' => extension_loaded('sqlsrv'),
-                ],
-                'timestamp' => (int) round(microtime(true) * 1000),
-            ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
-            FILE_APPEND
-        );
-        // #endregion
+        $typeCounts = $conn->executeQuery(
+            'SELECT type, COUNT(*) as count FROM equipment GROUP BY type'
+        )->fetchAllAssociative();
 
-        try {
-            $statusCounts = $conn->executeQuery(
-                'SELECT status, COUNT(*) as count FROM equipment GROUP BY status'
-            )->fetchAllAssociative();
+        $lineCounts = $conn->executeQuery(
+            'SELECT production_line, COUNT(*) as count FROM equipment GROUP BY production_line'
+        )->fetchAllAssociative();
 
-            $typeCounts = $conn->executeQuery(
-                'SELECT type, COUNT(*) as count FROM equipment GROUP BY type'
-            )->fetchAllAssociative();
-
-            $lineCounts = $conn->executeQuery(
-                'SELECT production_line, COUNT(*) as count FROM equipment GROUP BY production_line'
-            )->fetchAllAssociative();
-
-            $result = [
-                'byStatus' => $statusCounts,
-                'byType' => $typeCounts,
-                'byProductionLine' => $lineCounts,
-                'total' => $this->count([]),
-            ];
-
-            // #region agent log
-            @file_put_contents(
-                '/workspace-root/debug-3fd26b.log',
-                json_encode([
-                    'sessionId' => '3fd26b',
-                    'runId' => 'pre-fix',
-                    'hypothesisId' => 'H2',
-                    'location' => 'backend/src/Repository/EquipmentRepository.php::getStatistics',
-                    'message' => 'Equipment statistics query completed',
-                    'data' => [
-                        'statusRows' => count($statusCounts),
-                        'typeRows' => count($typeCounts),
-                        'lineRows' => count($lineCounts),
-                        'total' => $result['total'],
-                    ],
-                    'timestamp' => (int) round(microtime(true) * 1000),
-                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
-                FILE_APPEND
-            );
-            // #endregion
-
-            return $result;
-        } catch (\Throwable $exception) {
-            // #region agent log
-            @file_put_contents(
-                '/workspace-root/debug-3fd26b.log',
-                json_encode([
-                    'sessionId' => '3fd26b',
-                    'runId' => 'pre-fix',
-                    'hypothesisId' => 'H2',
-                    'location' => 'backend/src/Repository/EquipmentRepository.php::getStatistics',
-                    'message' => 'Equipment statistics query failed',
-                    'data' => [
-                        'exceptionClass' => get_class($exception),
-                        'exceptionMessage' => $exception->getMessage(),
-                    ],
-                    'timestamp' => (int) round(microtime(true) * 1000),
-                ], JSON_UNESCAPED_SLASHES) . PHP_EOL,
-                FILE_APPEND
-            );
-            // #endregion
-
-            throw $exception;
-        }
+        return [
+            'byStatus' => $statusCounts,
+            'byType' => $typeCounts,
+            'byProductionLine' => $lineCounts,
+            'total' => $this->count([]),
+        ];
     }
 }

@@ -7,13 +7,14 @@ A full-stack web application for managing production line tasks and equipment in
 
 ## Tech Stack
 
-| Layer      | Technology                          |
-|------------|-------------------------------------|
-| Frontend   | Angular 17+, TypeScript, Material   |
-| Backend    | PHP 8.2, Symfony 7.2                |
-| Database   | Microsoft SQL Server 2022           |
-| Container  | Docker, Docker Compose              |
-| CI/CD      | GitHub Actions                      |
+| Layer          | Technology                                |
+|----------------|-------------------------------------------|
+| Frontend       | Angular 17+, TypeScript, Material         |
+| Backend        | PHP 8.2, Symfony 7.2                      |
+| Database       | Microsoft SQL Server 2022                 |
+| Container      | Docker, Docker Compose                    |
+| CI/CD          | GitHub Actions                            |
+| Live Dashboard | Gradio on Hugging Face Spaces (optional)  |
 
 ## Features
 
@@ -23,6 +24,7 @@ A full-stack web application for managing production line tasks and equipment in
 - Link tasks with equipment units
 - Filter tasks by status, priority, and production line
 - Operational dashboard in Angular
+- Optional hybrid live dashboard (Oracle VM backend + HF Spaces)
 - Responsive Material Design UI
 - Fully containerized with Docker Compose
 - Automated CI/CD pipeline with GitHub Actions
@@ -47,6 +49,37 @@ Access the application:
 - **Frontend**: <http://localhost:4200>
 - **Backend API**: <http://localhost:8000/api>
 - **MSSQL**: `localhost:1433`
+
+## Hybrid Live Deployment (Recommended Free Setup)
+
+Use this hybrid model for a stable free public demo:
+
+- **Oracle Cloud Always Free VM** hosts full stack (`frontend`, `backend`, `database`).
+- **Hugging Face Spaces (Gradio)** shows a public live dashboard by reading backend stats APIs.
+
+### 1) Deploy full stack to Oracle VM
+
+See complete steps in `deploy/oracle/README.md`.
+
+Quick command:
+
+```bash
+cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
+```
+
+### 2) Deploy public dashboard to Hugging Face Spaces
+
+Use files in `hf-dashboard/`:
+
+- `hf-dashboard/app.py`
+- `hf-dashboard/requirements.txt`
+
+Set Space variable:
+
+- `BACKEND_API_BASE=https://YOUR_ORACLE_PUBLIC_HOST/api`
+
+Then share your HF Space URL as public live dashboard link.
 
 ### Initialize Database
 
@@ -114,6 +147,9 @@ docker compose exec backend php bin/console lexik:jwt:generate-keypair
 │   │   │   └── interceptors/   # HTTP interceptors
 │   ├── Dockerfile
 │   └── package.json
+│
+├── deploy/oracle/              # Oracle VM production overrides and guide
+├── hf-dashboard/               # Gradio dashboard for Hugging Face Spaces
 │
 ├── docker-compose.yml          # Multi-container orchestration
 ├── .github/workflows/ci.yml    # CI/CD pipeline
