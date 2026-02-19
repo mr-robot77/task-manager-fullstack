@@ -1,14 +1,6 @@
 doctrine:
     dbal:
-        driver: pdo_sqlsrv
-        host: '%env(DB_HOST)%'
-        port: '%env(int:DB_PORT)%'
-        dbname: '%env(DB_NAME)%'
-        user: '%env(DB_USER)%'
-        password: '%env(DB_PASSWORD)%'
-        options:
-            TrustServerCertificate: true
-        server_version: '2022'
+        url: '%env(resolve:DATABASE_URL)%'
 
     orm:
         auto_generate_proxy_classes: true

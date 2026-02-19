@@ -27,6 +27,7 @@ services:
       APP_ENV: prod
       APP_DEBUG: "0"
       APP_SECRET: "${APP_SECRET}"
+      DATABASE_URL: "mssql://sa:${DB_PASSWORD}@database:1433/task_manager?TrustServerCertificate=yes"
       DB_HOST: database
       DB_PORT: "1433"
       DB_NAME: task_manager

@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libicu-dev \
+    libpq-dev \
     gnupg2 \
     curl \
     apt-transport-https \
@@ -17,7 +18,7 @@ RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor
     && docker-php-ext-enable sqlsrv pdo_sqlsrv \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install intl
+RUN docker-php-ext-install intl pdo_pgsql
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

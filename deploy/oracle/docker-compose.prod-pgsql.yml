@@ -1,0 +1,45 @@
+# PostgreSQL variant - works on VMs with 1GB RAM (MSSQL needs 2GB+)
+services:
+  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: task_manager
+      POSTGRES_USER: taskmanager
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskmanager -d task_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    image: oracle-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      APP_SECRET: "${APP_SECRET}"
+      DATABASE_URL: "postgresql://taskmanager:${DB_PASSWORD}@database:5432/task_manager?serverVersion=15&charset=utf8"
+      JWT_PASSPHRASE: "${JWT_PASSPHRASE}"
+      CORS_ALLOW_ORIGIN: "${CORS_ALLOW_ORIGIN}"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    image: oracle-frontend:latest
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgsql_data:

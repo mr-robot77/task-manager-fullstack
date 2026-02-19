@@ -11,7 +11,7 @@ A full-stack web application for managing production line tasks and equipment in
 |----------------|-------------------------------------------|
 | Frontend       | Angular 17+, TypeScript, Material         |
 | Backend        | PHP 8.2, Symfony 7.2                      |
-| Database       | Microsoft SQL Server 2022                 |
+| Database       | Microsoft SQL Server 2022 or PostgreSQL 15 |
 | Container      | Docker, Docker Compose                    |
 | CI/CD          | GitHub Actions                            |
 | Live Dashboard | Gradio on Hugging Face Spaces (optional)  |
@@ -59,27 +59,16 @@ Use this hybrid model for a stable free public demo:
 
 ### 1) Deploy full stack to Oracle VM
 
-See complete steps in `deploy/oracle/README.md`.
-
-Quick command:
-
-```bash
-cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
-docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
-```
+See complete steps in `deploy/oracle/README.md`. Use the PostgreSQL compose file for 1GB RAM VMs.
 
 ### 2) Deploy public dashboard to Hugging Face Spaces
 
-Use files in `hf-dashboard/`:
+Use files in `hf-dashboard/`. Set the Space variable:
 
-- `hf-dashboard/app.py`
-- `hf-dashboard/requirements.txt`
+- **Key:** `BACKEND_API_BASE`
+- **Value:** `http://YOUR_ORACLE_VM_IP:8000/api` (use `http://` unless you have HTTPS configured)
 
-Set Space variable:
-
-- `BACKEND_API_BASE=https://YOUR_ORACLE_PUBLIC_HOST/api`
-
-Then share your HF Space URL as public live dashboard link.
+Then share your HF Space URL as the public live dashboard link.
 
 ### Initialize Database
 
