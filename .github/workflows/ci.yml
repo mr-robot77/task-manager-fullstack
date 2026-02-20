@@ -62,6 +62,8 @@ jobs:
       - name: Build production
         working-directory: ./frontend
         run: npm run build -- --configuration=production
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
   docker-build:
     runs-on: ubuntu-latest
