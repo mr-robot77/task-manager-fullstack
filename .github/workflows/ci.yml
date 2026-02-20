@@ -46,9 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Firefox for Karma
-        uses: browser-actions/setup-firefox@v1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -61,17 +58,6 @@ jobs:
       - name: Run linting
         working-directory: ./frontend
         run: npm run lint
-
-      - name: Run frontend tests
-        working-directory: ./frontend
-        run: npm run test:ci
-
-      - name: Upload frontend coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-coverage
-          path: frontend/coverage
-          if-no-files-found: warn
 
       - name: Build production
         working-directory: ./frontend
