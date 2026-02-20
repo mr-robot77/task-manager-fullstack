@@ -46,8 +46,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Firefox for Karma
-        run: sudo apt-get update && sudo apt-get install -y firefox
+      - name: Setup Firefox for Karma
+        uses: browser-actions/setup-firefox@v1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
