@@ -71,6 +71,20 @@ docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compos
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
 ```
 
+### Load demo data (optional)
+
+To populate the database with sample tasks and equipment for a tangible demo:
+
+```bash
+# MSSQL:
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data
+
+# PostgreSQL:
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console app:load-demo-data
+```
+
+Then log in with **demo@example.com** / **demodemo**.
+
 ## 5) Verify
 
 - **Frontend:** `http://<VM_PUBLIC_IP>:4200`

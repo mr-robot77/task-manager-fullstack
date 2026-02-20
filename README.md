@@ -5,21 +5,47 @@
 
 A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 
+---
+
+## Architecture
+
+```
+┌─────────────────┐     HTTP      ┌─────────────────┐     REST/JSON     ┌─────────────────┐
+│  Angular SPA    │◄─────────────►│  Symfony API    │◄────────────────►│  MSSQL / PG     │
+│  port 4200      │  (proxy/cors) │  port 8000      │  Doctrine ORM    │  1433 / 5432    │
+└─────────────────┘              └─────────────────┘                  └─────────────────┘
+         │                                  │
+         │                                  │ GET /api/tasks/statistics
+         │                                  │ GET /api/equipment/statistics
+         ▼                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│  Hugging Face Spaces (Gradio) — optional public dashboard reading backend stats APIs   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Frontend**: Angular SPA served by Nginx (prod) or ng serve (dev). Proxies `/api` to backend.
+- **Backend**: PHP built-in server (dev) or same in container. JWT auth via `lexik/jwt-authentication-bundle`.
+- **Database**: MSSQL primary; PostgreSQL supported for demo deployments (see below).
+
+---
+
+## Tech Stack (Versions)
+
+| Layer          | Technology                                | Version / Notes |
+|----------------|-------------------------------------------|-----------------|
+| Frontend       | Angular, TypeScript, Angular Material     | 17.3, ES2022    |
+| Backend        | PHP, Symfony                              | 8.2, 7.2        |
+| ORM            | Doctrine                                  | 3.x             |
+| Database       | Microsoft SQL Server / PostgreSQL         | 2022 / 15       |
+| Auth           | JWT (lexik/jwt-authentication-bundle)     | Stateless       |
+| Container      | Docker, Docker Compose                    | Compose v2      |
+| CI/CD          | GitHub Actions                            | ubuntu-latest   |
+| Live Dashboard | Gradio                                    | 4.44+, optional |
+
 ### Database
 
-- **Primary:** Microsoft SQL Server 2022 — used for local development and production (requires ≥2GB RAM).
-- **Demo option:** PostgreSQL 15 — supported only for demo deployments on VMs with limited RAM (e.g. Oracle 1GB). Use `deploy/oracle/docker-compose.prod-pgsql.yml` for that scenario. For production and development, always use MSSQL.
-
-## Tech Stack
-
-| Layer          | Technology                                |
-|----------------|-------------------------------------------|
-| Frontend       | Angular 17+, TypeScript, Material         |
-| Backend        | PHP 8.2, Symfony 7.2                      |
-| Database       | **Microsoft SQL Server 2022** (primary). PostgreSQL 15 optional for demo on low-RAM VMs |
-| Container      | Docker, Docker Compose                    |
-| CI/CD          | GitHub Actions                            |
-| Live Dashboard | Gradio on Hugging Face Spaces (optional)  |
+- **Primary:** Microsoft SQL Server 2022 — local development and production (VM needs ≥2GB RAM).
+- **Demo fallback:** PostgreSQL 15 — only when VM has ~1GB RAM. Use `deploy/oracle/docker-compose.prod-pgsql.yml`. Production should use MSSQL.
 
 ## Features
 
@@ -49,11 +75,25 @@ cd task-manager-fullstack
 docker compose up --build
 ```
 
-Access the application:
+### Ports
 
-- **Frontend**: <http://localhost:4200>
-- **Backend API**: <http://localhost:8000/api>
-- **MSSQL**: `localhost:1433`
+| Service   | Port | Description                    |
+|-----------|------|--------------------------------|
+| Frontend  | 4200 | Angular SPA (dev: ng serve)   |
+| Backend   | 8000 | Symfony API                    |
+| MSSQL     | 1433 | Database (PostgreSQL: 5432)   |
+
+Access: **Frontend** <http://localhost:4200> · **API** <http://localhost:8000/api>
+
+### Demo Data
+
+After initial setup, load sample tasks and equipment:
+
+```bash
+docker compose exec backend php bin/console app:load-demo-data
+```
+
+Then log in with **demo@example.com** / **demodemo**.
 
 ## Hybrid Live Deployment (Recommended Free Setup)
 
@@ -75,17 +115,18 @@ Use files in `hf-dashboard/`. Set the Space variable:
 
 Then share your HF Space URL as the public live dashboard link.
 
-### Initialize Database
+### Initialize Database and JWT
 
 ```bash
 docker compose exec backend php bin/console doctrine:database:create --if-not-exists
 docker compose exec backend php bin/console doctrine:schema:update --force
+docker compose exec backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
 ```
 
-### Generate JWT Keys
+### Load Demo Data (Optional)
 
 ```bash
-docker compose exec backend php bin/console lexik:jwt:generate-keypair
+docker compose exec backend php bin/console app:load-demo-data
 ```
 
 ## API Endpoints
@@ -120,34 +161,53 @@ docker compose exec backend php bin/console lexik:jwt:generate-keypair
 - `type`: `machine`, `robot`, `conveyor`, `sensor`, `tooling`
 - `productionLine`: production line name
 
+## Environment Variables
+
+| Variable           | Description                    | Example (local)                     |
+|--------------------|--------------------------------|-------------------------------------|
+| `DATABASE_URL`     | Doctrine connection string     | `mssql://sa:PWD@database:1433/...`  |
+| `APP_SECRET`       | Symfony secret                 | 32+ character string                |
+| `JWT_PASSPHRASE`   | Lexik JWT key passphrase       | Any string                          |
+| `CORS_ALLOW_ORIGIN`| Allowed CORS origins (regex)   | `^https?://(localhost\|...)`        |
+| `BACKEND_API_BASE` | HF dashboard backend URL        | `http://VM_IP:8000/api`             |
+
+For production, use `deploy/oracle/.env.prod` and set strong secrets.
+
 ## Project Structure
 
 ```text
 .
 ├── backend/                    # Symfony PHP API
 │   ├── src/
+│   │   ├── Command/            # CLI commands (e.g. app:load-demo-data)
 │   │   ├── Controller/         # API endpoints
-│   │   ├── Entity/             # Database models
-│   │   └── Repository/         # Data access layer
-│   ├── config/                 # Symfony configuration
-│   ├── Dockerfile
-│   └── composer.json
+│   │   ├── Entity/             # Task, Equipment, User
+│   │   └── Repository/         # Doctrine repositories
+│   ├── config/                 # Symfony + Doctrine + security
+│   ├── phpunit.dist.xml        # Tests use SQLite in-memory (no MSSQL in CI)
+│   └── Dockerfile              # PHP 8.2 + MSSQL + PostgreSQL drivers
 │
 ├── frontend/                   # Angular SPA
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/     # UI components
-│   │   │   ├── services/       # Task and equipment API services
-│   │   │   └── interceptors/   # HTTP interceptors
-│   ├── Dockerfile
-│   └── package.json
+│   ├── src/app/
+│   │   ├── components/         # Task list, equipment, dashboard
+│   │   ├── services/           # API services
+│   │   └── interceptors/       # JWT auth header
+│   ├── angular.json            # Build config (production uses prod env)
+│   ├── karma.conf.js           # Tests (ChromeHeadlessNoSandbox)
+│   └── Dockerfile              # Multi-stage: Node build → Nginx serve
 │
-├── deploy/oracle/              # Oracle VM production overrides and guide
-├── hf-dashboard/               # Gradio dashboard for Hugging Face Spaces
+├── deploy/oracle/               # Oracle VM deployment
+│   ├── docker-compose.prod.yml # MSSQL (production)
+│   ├── docker-compose.prod-pgsql.yml  # PostgreSQL (demo only)
+│   └── README.md               # Step-by-step deploy guide
 │
-├── docker-compose.yml          # Multi-container orchestration
-├── .github/workflows/ci.yml    # CI/CD pipeline
-└── README.md
+├── hf-dashboard/               # Gradio live dashboard (Hugging Face Spaces)
+│   ├── app.py
+│   ├── requirements.txt
+│   └── deploy_to_hf.py        # Upload + configure HF Space
+│
+├── docker-compose.yml          # Local dev: database, backend, frontend
+└── .github/workflows/          # ci.yml, smoke-test.yml
 ```
 
 ## Development
@@ -170,29 +230,32 @@ ng serve
 
 ## Testing
 
-### Backend tests
+### Backend tests (SQLite in-memory, no external DB)
 
 ```bash
 cd backend
 php vendor/bin/phpunit --testdox
 ```
 
+Backend tests use `DATABASE_URL=sqlite:///:memory:` so CI runs without MSSQL.
+
 ### Frontend tests
 
 ```bash
 cd frontend
-npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+npm run test:ci
 ```
 
-## Coverage
+Uses ChromeHeadlessNoSandbox. On Linux CI, Chromium is installed explicitly.
 
-- Backend and frontend coverage reports are generated in CI on every push.
-- Dedicated `Smoke Test API` workflow runs on push, pull request, and daily schedule to boot `database` and `backend`, then checks:
-  - `GET /api/tasks/statistics`
-  - `GET /api/equipment/statistics`
-- You can download reports from workflow artifacts:
-  - `backend-coverage` (`backend-clover.xml`)
-  - `frontend-coverage` (`lcov.info`, HTML report, Cobertura XML)
+## CI/CD
+
+| Workflow      | Trigger                    | Steps                                                                 |
+|---------------|----------------------------|-----------------------------------------------------------------------|
+| **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, test:ci, build. Docker build both images. |
+| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init, then curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
+
+Artifacts: `backend-coverage` (clover XML), `frontend-coverage` (lcov, HTML).
 
 ## License
 

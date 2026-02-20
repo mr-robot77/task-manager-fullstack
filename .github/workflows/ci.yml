@@ -45,6 +45,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Chrome for Karma
+        run: |
+          sudo apt-get update && sudo apt-get install -y chromium-browser
+          export CHROME_BIN=/usr/bin/chromium-browser
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -61,12 +66,14 @@ jobs:
       - name: Run frontend tests
         working-directory: ./frontend
         run: npm run test:ci
+        env:
+          CHROME_BIN: /usr/bin/chromium-browser
 
       - name: Upload frontend coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
-          path: frontend/coverage/task-manager-frontend
+          path: frontend/coverage
 
       - name: Build production
         working-directory: ./frontend

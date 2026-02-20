@@ -19,8 +19,10 @@ jobs:
       - name: Start backend stack for smoke test
         run: docker compose up --build -d database backend
 
-      - name: Prepare backend database for smoke test
+      - name: Wait for MSSQL and prepare database
         run: |
+          echo "Waiting for MSSQL (healthcheck start_period 30s)..."
+          sleep 55
           docker compose exec -T backend php bin/console doctrine:database:create --if-not-exists
           docker compose exec -T backend php bin/console doctrine:schema:update --force
           docker compose exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists

@@ -29,7 +29,8 @@ module.exports = function (config) {
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-dev-shm-usage']
+        flags: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+        ...(process.env.CHROME_BIN && { binary: process.env.CHROME_BIN })
       }
     },
     reporters: ['progress', 'kjhtml'],
