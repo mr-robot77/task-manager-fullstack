@@ -4,12 +4,12 @@ This guide deploys the full stack (Angular + Symfony + Database) on one Oracle V
 
 ## Database Options
 
-| Option | RAM Required | Compose File | Notes |
-|--------|--------------|--------------|------|
-| **PostgreSQL** | ~512MB | `docker-compose.prod-pgsql.yml` | Recommended for 1GB VMs |
-| **MSSQL** | ≥2GB | `docker-compose.prod.yml` | Requires VM with 2GB+ RAM |
+| Option | RAM Required | Compose File | Use Case |
+|--------|--------------|--------------|----------|
+| **MSSQL** | ≥2GB | `docker-compose.prod.yml` | **Primary** — production and development |
+| **PostgreSQL** | ~512MB | `docker-compose.prod-pgsql.yml` | **Demo only** — for VMs with 1GB RAM when MSSQL cannot run |
 
-If your Oracle VM has only 1GB RAM, use the PostgreSQL variant.
+The project is built around **Microsoft SQL Server** as the primary database. PostgreSQL is supported as a **fallback for demo purposes only** when the VM has insufficient RAM (MSSQL requires ≥2GB). For production, always use MSSQL.
 
 ## 1) Prepare VM
 
@@ -41,25 +41,31 @@ Edit `deploy/oracle/.env.prod` and set secure values for `APP_SECRET`, `DB_PASSW
 
 ## 3) Start stack
 
-**For 1GB RAM VMs (PostgreSQL):**
-
-```bash
-docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml up -d
-```
-
-**For 2GB+ RAM VMs (MSSQL):**
+**Production / standard (MSSQL, 2GB+ RAM):**
 
 ```bash
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
+```
+
+**Demo only (PostgreSQL, 1GB RAM VMs):**
+
+```bash
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml up -d
 ```
 
 > If the VM cannot reach Docker Hub, build images on a machine with internet access, save them with `docker save`, and load them on the VM with `docker load`.
 
 ## 4) Initialize database and JWT keys
 
-Replace `docker-compose.prod-pgsql.yml` with `docker-compose.prod.yml` if using MSSQL.
+Use `docker-compose.prod.yml` for MSSQL, or `docker-compose.prod-pgsql.yml` for the demo PostgreSQL setup:
 
 ```bash
+# MSSQL (production):
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console doctrine:database:create --if-not-exists
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console doctrine:schema:update --force
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
+
+# PostgreSQL (demo only):
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console doctrine:database:create --if-not-exists
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console doctrine:schema:update --force
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists

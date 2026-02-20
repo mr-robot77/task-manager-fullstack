@@ -5,13 +5,18 @@
 
 A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 
+### Database
+
+- **Primary:** Microsoft SQL Server 2022 — used for local development and production (requires ≥2GB RAM).
+- **Demo option:** PostgreSQL 15 — supported only for demo deployments on VMs with limited RAM (e.g. Oracle 1GB). Use `deploy/oracle/docker-compose.prod-pgsql.yml` for that scenario. For production and development, always use MSSQL.
+
 ## Tech Stack
 
 | Layer          | Technology                                |
 |----------------|-------------------------------------------|
 | Frontend       | Angular 17+, TypeScript, Material         |
 | Backend        | PHP 8.2, Symfony 7.2                      |
-| Database       | Microsoft SQL Server 2022 or PostgreSQL 15 |
+| Database       | **Microsoft SQL Server 2022** (primary). PostgreSQL 15 optional for demo on low-RAM VMs |
 | Container      | Docker, Docker Compose                    |
 | CI/CD          | GitHub Actions                            |
 | Live Dashboard | Gradio on Hugging Face Spaces (optional)  |
@@ -59,7 +64,7 @@ Use this hybrid model for a stable free public demo:
 
 ### 1) Deploy full stack to Oracle VM
 
-See complete steps in `deploy/oracle/README.md`. Use the PostgreSQL compose file for 1GB RAM VMs.
+See complete steps in `deploy/oracle/README.md`. By default use MSSQL (2GB+ RAM). For demo only on 1GB RAM VMs, use the PostgreSQL compose file.
 
 ### 2) Deploy public dashboard to Hugging Face Spaces
 

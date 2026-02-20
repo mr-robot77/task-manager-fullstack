@@ -1,4 +1,5 @@
-# PostgreSQL variant - works on VMs with 1GB RAM (MSSQL needs 2GB+)
+# PostgreSQL (DEMO ONLY) - fallback for VMs with 1GB RAM where MSSQL cannot run.
+# Primary database is MSSQL; use docker-compose.prod.yml for production.
 services:
   database:
     image: postgres:15-alpine
