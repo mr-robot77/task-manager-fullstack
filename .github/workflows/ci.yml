@@ -16,7 +16,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: intl
+          extensions: intl, pdo_sqlite
           coverage: xdebug
           tools: composer
 
@@ -39,6 +39,7 @@ jobs:
         with:
           name: backend-coverage
           path: backend/coverage/backend-clover.xml
+          if-no-files-found: warn
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -47,8 +48,11 @@ jobs:
 
       - name: Setup Chrome for Karma
         run: |
-          sudo apt-get update && sudo apt-get install -y chromium-browser
-          export CHROME_BIN=/usr/bin/chromium-browser
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-key.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-key.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          echo "CHROME_BIN=/usr/bin/google-chrome-stable" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,14 +70,13 @@ jobs:
       - name: Run frontend tests
         working-directory: ./frontend
         run: npm run test:ci
-        env:
-          CHROME_BIN: /usr/bin/chromium-browser
 
       - name: Upload frontend coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: frontend/coverage
+          if-no-files-found: warn
 
       - name: Build production
         working-directory: ./frontend
