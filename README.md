@@ -39,7 +39,7 @@ A full-stack web application for managing production line tasks and equipment in
 | Database       | Microsoft SQL Server / PostgreSQL         | 2022 / 15       |
 | Auth           | JWT (lexik/jwt-authentication-bundle)     | Stateless       |
 | Container      | Docker, Docker Compose                    | Compose v2      |
-| CI/CD          | GitHub Actions                            | ubuntu-latest   |
+| CI/CD          | GitHub Actions                            | ubuntu-22.04    |
 | Live Dashboard | Gradio                                    | 4.44+, optional |
 
 ### Database
@@ -165,7 +165,7 @@ docker compose exec backend php bin/console app:load-demo-data
 
 | Variable           | Description                    | Example (local)                     |
 |--------------------|--------------------------------|-------------------------------------|
-| `DATABASE_URL`     | Doctrine connection string     | `mssql://sa:PWD@database:1433/...`  |
+| `DATABASE_URL`     | Doctrine connection string (add `?TrustServerCertificate=yes` for ODBC 18) | `mssql://sa:PWD@database:1433/...`  |
 | `APP_SECRET`       | Symfony secret                 | 32+ character string                |
 | `JWT_PASSPHRASE`   | Lexik JWT key passphrase       | Any string                          |
 | `CORS_ALLOW_ORIGIN`| Allowed CORS origins (regex)   | `^https?://(localhost\|...)`        |
@@ -193,7 +193,7 @@ For production, use `deploy/oracle/.env.prod` and set strong secrets.
 │   │   ├── services/           # API services
 │   │   └── interceptors/       # JWT auth header
 │   ├── angular.json            # Build config (production uses prod env)
-│   ├── karma.conf.js           # Tests (ChromeHeadlessNoSandbox)
+│   ├── karma.conf.js           # Tests (FirefoxHeadless)
 │   └── Dockerfile              # Multi-stage: Node build → Nginx serve
 │
 ├── deploy/oracle/               # Oracle VM deployment
@@ -246,16 +246,16 @@ cd frontend
 npm run test:ci
 ```
 
-Uses ChromeHeadlessNoSandbox. On Linux CI, Chromium is installed explicitly.
+Uses FirefoxHeadless. Run locally; not executed in CI (lint and build only).
 
 ## CI/CD
 
 | Workflow      | Trigger                    | Steps                                                                 |
 |---------------|----------------------------|-----------------------------------------------------------------------|
-| **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, test:ci, build. Docker build both images. |
-| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init, then curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
+| **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, build. Docker build both images. (Karma tests run locally only.) |
+| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init (TrustServerCertificate for ODBC 18), curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
 
-Artifacts: `backend-coverage` (clover XML), `frontend-coverage` (lcov, HTML).
+Artifacts: `backend-coverage` (clover XML).
 
 ## License
 
