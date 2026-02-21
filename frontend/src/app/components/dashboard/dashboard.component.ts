@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -180,26 +180,41 @@ export class DashboardComponent implements OnInit {
   stats: TaskStatistics = DEMO_TASK_STATS;
   equipmentStats: EquipmentStatistics = DEMO_EQUIPMENT_STATS;
 
-  constructor(private taskService: TaskService, private equipmentService: EquipmentService) {}
+  constructor(
+    private taskService: TaskService,
+    private equipmentService: EquipmentService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
+    this.cdr.detectChanges();
     this.taskService.getStatistics().subscribe({
-      next: (data) => { if (this._hasData(data)) this.stats = data; },
+      next: (data) => {
+        if (this._hasData(data)) {
+          this.stats = data;
+          this.cdr.detectChanges();
+        }
+      },
       error: () => {},
     });
 
     this.equipmentService.getStatistics().subscribe({
-      next: (data) => { if (this._hasEquipmentData(data)) this.equipmentStats = data; },
+      next: (data) => {
+        if (this._hasEquipmentData(data)) {
+          this.equipmentStats = data;
+          this.cdr.detectChanges();
+        }
+      },
       error: () => {},
     });
   }
 
   private _hasData(s: TaskStatistics | null): boolean {
-    return !!s && (s.total > 0 || (s.byStatus?.length ?? 0) > 0);
+    return !!s && Number(s.total) > 0;
   }
 
   private _hasEquipmentData(s: EquipmentStatistics | null): boolean {
-    return !!s && (s.total > 0 || (s.byStatus?.length ?? 0) > 0);
+    return !!s && Number(s.total) > 0;
   }
 
   formatLabel(status: string): string {
