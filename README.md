@@ -2,6 +2,7 @@
 
 [![CI/CD Pipeline](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/ci.yml)
 [![Smoke Test API](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/smoke-test.yml)
+[![Deploy to Oracle VM](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/deploy-oracle-vm.yml/badge.svg)](https://github.com/mr-robot77/task-manager-fullstack/actions/workflows/deploy-oracle-vm.yml)
 
 A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
 

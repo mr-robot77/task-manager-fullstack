@@ -17,7 +17,7 @@ jobs:
         run: docker build -t oracle-backend:latest ./backend
 
       - name: Build frontend image
-        run: docker build -t oracle-frontend:latest ./frontend
+        run: docker build --no-cache -t oracle-frontend:latest ./frontend
 
       - name: Pull MSSQL image
         run: |
@@ -64,9 +64,10 @@ jobs:
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
           script: |
             cd ~/task-manager-fullstack
-            docker load -i ~/images.tar
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
-            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml up -d
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml down
+            docker load -i ~/images.tar
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml up -d --force-recreate
             sleep 120
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
             echo "Deploy done. Frontend: http://152.70.53.27:4200"
