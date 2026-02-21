@@ -17,6 +17,8 @@ A lightweight public dashboard for live task and equipment metrics. It fetches d
 - `/api/tasks/statistics`
 - `/api/equipment/statistics`
 
+**Demo fallback:** When the backend is unreachable or returns empty data, built-in demo statistics are displayed so the dashboard always shows sample charts and tables.
+
 ## Run locally
 
 ```bash
@@ -44,7 +46,7 @@ pip install huggingface_hub
 python hf-dashboard/deploy_to_hf.py
 ```
 
-This uploads `README.md`, `app.py`, `requirements.txt`, resolves any variable/secret name collision, sets `BACKEND_API_BASE`, and restarts the Space.
+This uploads `README.md`, `app.py`, `requirements.txt`, resolves any variable/secret name collision, sets `BACKEND_API_BASE`, and restarts the Space. Requires `python_version: "3.11"` and `huggingface_hub<1.0` (see `requirements.txt`) for compatibility with Gradio.
 
 ## Backend configuration (manual)
 

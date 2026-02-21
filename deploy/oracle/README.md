@@ -55,35 +55,32 @@ docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compos
 
 > If the VM cannot reach Docker Hub, build images on a machine with internet access, save them with `docker save`, and load them on the VM with `docker load`.
 
-## 4) Initialize database and JWT keys
+## 4) Initialize database, JWT, and demo data
 
-Use `docker-compose.prod.yml` for MSSQL, or `docker-compose.prod-pgsql.yml` for the demo PostgreSQL setup:
+The backend `docker-entrypoint.sh` runs automatically on container start:
+
+- `doctrine:database:create --if-not-exists`
+- `doctrine:schema:update --force`
+- `lexik:jwt:generate-keypair --skip-if-exists`
+- `app:load-demo-data`
+
+**Manual init (optional)** — if you need to re-run:
 
 ```bash
 # MSSQL (production):
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console doctrine:database:create --if-not-exists
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console doctrine:schema:update --force
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data
 
 # PostgreSQL (demo only):
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console doctrine:database:create --if-not-exists
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console doctrine:schema:update --force
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
-```
-
-### Load demo data (optional)
-
-To populate the database with sample tasks and equipment for a tangible demo:
-
-```bash
-# MSSQL:
-docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data
-
-# PostgreSQL:
 docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console app:load-demo-data
 ```
 
-Then log in with **demo@example.com** / **demodemo**.
+**Demo login:** `demo@example.com` / `demodemo`
 
 ## 5) Verify
 

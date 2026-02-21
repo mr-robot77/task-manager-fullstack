@@ -23,6 +23,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
@@ -47,7 +53,8 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

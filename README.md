@@ -75,25 +75,30 @@ cd task-manager-fullstack
 docker compose up --build
 ```
 
+Wait for the backend healthcheck to pass (about 90 seconds on first run). Then:
+
+- **Frontend:** <http://localhost:4200> — auto-logs in as demo user; shows demo data or fallback when API is unavailable
+- **API:** <http://localhost:8000/api>
+
 ### Ports
 
 | Service   | Port | Description                    |
 |-----------|------|--------------------------------|
-| Frontend  | 4200 | Angular SPA (dev: ng serve)   |
+| Frontend  | 4200 | Angular SPA (Nginx in Docker)   |
 | Backend   | 8000 | Symfony API                    |
-| MSSQL     | 1433 | Database (PostgreSQL: 5432)   |
+| MSSQL     | 1433 | Database (PostgreSQL: 5432)    |
 
-Access: **Frontend** <http://localhost:4200> · **API** <http://localhost:8000/api>
+### Demo Data (Automatic)
 
-### Demo Data
+On first `docker compose up`, the backend entrypoint automatically:
 
-After initial setup, load sample tasks and equipment:
+- Creates the database and applies schema
+- Generates JWT keys
+- Loads demo data (9 tasks, 7 equipment)
 
-```bash
-docker compose exec backend php bin/console app:load-demo-data
-```
+**Demo login:** `demo@example.com` / `demodemo` — no manual login required; the frontend auto-authenticates on first visit.
 
-Then log in with **demo@example.com** / **demodemo**.
+If the backend is unreachable, the frontend and HF dashboard display built-in demo fallback data.
 
 ## Hybrid Live Deployment (Recommended Free Setup)
 
@@ -108,27 +113,12 @@ See complete steps in `deploy/oracle/README.md`. By default use MSSQL (2GB+ RAM)
 
 ### 2) Deploy public dashboard to Hugging Face Spaces
 
-Use files in `hf-dashboard/`. Set the Space variable:
-
-- **Key:** `BACKEND_API_BASE`
-- **Value:** `http://YOUR_ORACLE_VM_IP:8000/api` (use `http://` unless you have HTTPS configured)
-
-Then share your HF Space URL as the public live dashboard link.
-
-### Automatic Setup (on first `docker compose up`)
-
-The backend entrypoint automatically runs:
-
-- Database creation and schema update
-- JWT keypair generation
-- Demo data loading (`demo@example.com` / `demodemo`)
-
-The frontend auto-logs in as the demo user on first visit—no manual login required. The app is ready to use after `docker compose up`.
+Use files in `hf-dashboard/`. Run `python hf-dashboard/deploy_to_hf.py` (with `HF_TOKEN` or `huggingface-cli login`). The script uploads files, sets `BACKEND_API_BASE`, and resolves variable/secret collisions. When the backend is unreachable, the dashboard shows built-in demo data.
 
 ### Manual Commands (if needed)
 
 ```bash
-# Re-run database setup
+# Re-run database schema
 docker compose exec backend php bin/console doctrine:schema:update --force
 
 # Re-load or add more demo data
@@ -190,6 +180,7 @@ For production, use `deploy/oracle/.env.prod` and set strong secrets.
 │   │   ├── Entity/             # Task, Equipment, User
 │   │   └── Repository/         # Doctrine repositories
 │   ├── config/                 # Symfony + Doctrine + security
+│   ├── docker-entrypoint.sh    # Auto-init: DB, schema, JWT, demo data
 │   ├── phpunit.dist.xml        # Tests use SQLite in-memory (no MSSQL in CI)
 │   └── Dockerfile              # PHP 8.2 + MSSQL + PostgreSQL drivers
 │
@@ -259,7 +250,7 @@ Uses FirefoxHeadless. Run locally; not executed in CI (lint and build only).
 | Workflow      | Trigger                    | Steps                                                                 |
 |---------------|----------------------------|-----------------------------------------------------------------------|
 | **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, build. Docker build both images. (Karma tests run locally only.) |
-| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init (TrustServerCertificate for ODBC 18), curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
+| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init (TrustServerCertificate for ODBC 18), curls `/api/tasks/statistics` and `/api/equipment/statistics`. Backend uses `docker-entrypoint.sh` for auto-init; smoke test also runs manual init for compatibility. |
 
 Artifacts: `backend-coverage` (clover XML).
 
