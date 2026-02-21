@@ -115,18 +115,24 @@ Use files in `hf-dashboard/`. Set the Space variable:
 
 Then share your HF Space URL as the public live dashboard link.
 
-### Initialize Database and JWT
+### Automatic Setup (on first `docker compose up`)
+
+The backend entrypoint automatically runs:
+
+- Database creation and schema update
+- JWT keypair generation
+- Demo data loading (`demo@example.com` / `demodemo`)
+
+The frontend auto-logs in as the demo user on first visit—no manual login required. The app is ready to use after `docker compose up`.
+
+### Manual Commands (if needed)
 
 ```bash
-docker compose exec backend php bin/console doctrine:database:create --if-not-exists
+# Re-run database setup
 docker compose exec backend php bin/console doctrine:schema:update --force
-docker compose exec backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
-```
 
-### Load Demo Data (Optional)
-
-```bash
-docker compose exec backend php bin/console app:load-demo-data
+# Re-load or add more demo data
+docker compose exec backend php bin/console app:load-demo-data --force
 ```
 
 ## API Endpoints

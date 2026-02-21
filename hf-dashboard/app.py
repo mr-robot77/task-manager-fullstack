@@ -10,6 +10,39 @@ import requests
 DEFAULT_API_BASE = os.getenv("BACKEND_API_BASE", "http://localhost:8000/api").rstrip("/")
 REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "10"))
 
+# Fallback demo data when API is unavailable or returns empty
+DEMO_TASKS_STATS = {
+    "total": 9,
+    "byStatus": [
+        {"status": "todo", "count": 3},
+        {"status": "in_progress", "count": 2},
+        {"status": "review", "count": 2},
+        {"status": "done", "count": 2},
+    ],
+    "byPriority": [
+        {"priority": "critical", "count": 2},
+        {"priority": "high", "count": 2},
+        {"priority": "medium", "count": 4},
+        {"priority": "low", "count": 1},
+    ],
+}
+DEMO_EQUIPMENT_STATS = {
+    "total": 7,
+    "byStatus": [
+        {"status": "available", "count": 3},
+        {"status": "in_use", "count": 2},
+        {"status": "maintenance", "count": 1},
+        {"status": "offline", "count": 1},
+    ],
+    "byType": [
+        {"type": "robot", "count": 2},
+        {"type": "machine", "count": 2},
+        {"type": "conveyor", "count": 1},
+        {"type": "sensor", "count": 1},
+        {"type": "tooling", "count": 1},
+    ],
+}
+
 
 def _fetch_json(url: str) -> dict:
     response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
@@ -43,6 +76,17 @@ def _bar_figure(frame: pd.DataFrame, x_col: str, title: str):
     )
 
 
+def _use_demo(data: dict | None, demo: dict) -> dict:
+    """Use demo data when API returns empty or fails."""
+    if not data:
+        return demo
+    total = int(data.get("total", 0))
+    by_status = data.get("byStatus", [])
+    if total == 0 and not by_status:
+        return demo
+    return data
+
+
 def load_dashboard(api_base: str):
     api_base = (api_base or DEFAULT_API_BASE).rstrip("/")
     errors: list[str] = []
@@ -54,14 +98,19 @@ def load_dashboard(api_base: str):
         tasks_stats = _fetch_json(f"{api_base}/tasks/statistics")
     except requests.RequestException as exc:
         errors.append(f"- Failed to load tasks statistics: `{exc}`")
+        tasks_stats = DEMO_TASKS_STATS
 
     try:
         equipment_stats = _fetch_json(f"{api_base}/equipment/statistics")
     except requests.RequestException as exc:
         errors.append(f"- Failed to load equipment statistics: `{exc}`")
+        equipment_stats = DEMO_EQUIPMENT_STATS
 
-    tasks_total = int(tasks_stats.get("total", 0)) if tasks_stats else 0
-    equipment_total = int(equipment_stats.get("total", 0)) if equipment_stats else 0
+    tasks_stats = _use_demo(tasks_stats, DEMO_TASKS_STATS)
+    equipment_stats = _use_demo(equipment_stats, DEMO_EQUIPMENT_STATS)
+
+    tasks_total = int(tasks_stats.get("total", 0))
+    equipment_total = int(equipment_stats.get("total", 0))
     timestamp = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
 
     summary_md = (

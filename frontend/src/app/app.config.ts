@@ -1,15 +1,33 @@
-import { ApplicationConfig } from '@angular/core';
+import { APPLICATION_INITIALIZER, ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { catchError, map, of } from 'rxjs';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { AuthService } from './services/auth.service';
+
+function demoAutoLoginFactory(auth: AuthService) {
+  return () =>
+    auth.getToken()
+      ? of(undefined)
+      : auth.login('demo@example.com', 'demodemo').pipe(
+          map(() => undefined),
+          catchError(() => of(undefined))
+        );
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
+    {
+      provide: APPLICATION_INITIALIZER,
+      useFactory: demoAutoLoginFactory,
+      deps: [AuthService],
+      multi: true,
+    },
   ]
 };

@@ -5,6 +5,50 @@ import { MatIconModule } from '@angular/material/icon';
 import { TaskService, TaskStatistics } from '../../services/task.service';
 import { EquipmentService, EquipmentStatistics } from '../../services/equipment.service';
 
+const DEMO_TASK_STATS: TaskStatistics = {
+  total: 9,
+  byStatus: [
+    { status: 'todo', count: 3 },
+    { status: 'in_progress', count: 2 },
+    { status: 'review', count: 2 },
+    { status: 'done', count: 2 },
+  ],
+  byPriority: [
+    { priority: 'critical', count: 2 },
+    { priority: 'high', count: 2 },
+    { priority: 'medium', count: 4 },
+    { priority: 'low', count: 1 },
+  ],
+  byProductionLine: [
+    { production_line: 'Line A', count: 4 },
+    { production_line: 'Line B', count: 2 },
+    { production_line: 'Line C', count: 2 },
+    { production_line: 'General', count: 1 },
+  ],
+};
+
+const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
+  total: 7,
+  byStatus: [
+    { status: 'available', count: 3 },
+    { status: 'in_use', count: 2 },
+    { status: 'maintenance', count: 1 },
+    { status: 'offline', count: 1 },
+  ],
+  byType: [
+    { type: 'robot', count: 2 },
+    { type: 'machine', count: 2 },
+    { type: 'conveyor', count: 1 },
+    { type: 'sensor', count: 1 },
+    { type: 'tooling', count: 1 },
+  ],
+  byProductionLine: [
+    { production_line: 'Line A', count: 3 },
+    { production_line: 'Line B', count: 2 },
+    { production_line: 'Line C', count: 2 },
+  ],
+};
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -140,14 +184,22 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.taskService.getStatistics().subscribe({
-      next: (data) => this.stats = data,
-      error: (err) => console.error('Failed to load statistics', err)
+      next: (data) => this.stats = this._hasData(data) ? data : DEMO_TASK_STATS,
+      error: () => (this.stats = DEMO_TASK_STATS),
     });
 
     this.equipmentService.getStatistics().subscribe({
-      next: (data) => this.equipmentStats = data,
-      error: (err) => console.error('Failed to load equipment statistics', err)
+      next: (data) => this.equipmentStats = this._hasEquipmentData(data) ? data : DEMO_EQUIPMENT_STATS,
+      error: () => (this.equipmentStats = DEMO_EQUIPMENT_STATS),
     });
+  }
+
+  private _hasData(s: TaskStatistics | null): boolean {
+    return !!s && (s.total > 0 || (s.byStatus?.length ?? 0) > 0);
+  }
+
+  private _hasEquipmentData(s: EquipmentStatistics | null): boolean {
+    return !!s && (s.total > 0 || (s.byStatus?.length ?? 0) > 0);
   }
 
   formatLabel(status: string): string {

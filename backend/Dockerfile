@@ -33,6 +33,10 @@ RUN composer dump-autoload --optimize --no-interaction
 RUN mkdir -p var/cache var/log config/jwt \
     && chmod -R 777 var config/jwt
 
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 8000
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

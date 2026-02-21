@@ -22,7 +22,22 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 FILES = ["README.md", "app.py", "requirements.txt"]
 
 
+def _load_env():
+    """Load HF_TOKEN from project root .env if present."""
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.strip().startswith("#"):
+                k, _, v = line.partition("=")
+                if k.strip() == "HF_TOKEN":
+                    val = v.strip().strip("'\"").split("#")[0].strip()
+                    if val:
+                        os.environ.setdefault("HF_TOKEN", val)
+                    break
+
+
 def main():
+    _load_env()
     token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
     if not token:
         print("HF_TOKEN not set. Either:", file=sys.stderr)
@@ -47,6 +62,11 @@ def main():
         print(f"  OK {fname}")
 
     print("Setting BACKEND_API_BASE variable...")
+    try:
+        api.delete_space_secret(repo_id=SPACE_ID, key="BACKEND_API_BASE")
+        print("  Removed conflicting secret BACKEND_API_BASE (if any)")
+    except Exception:
+        pass
     try:
         api.add_space_variable(
             repo_id=SPACE_ID,

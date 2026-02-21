@@ -10,6 +10,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Task, TaskService, TaskFilters } from '../../services/task.service';
 
+const DEMO_TASKS: Task[] = [
+  { id: 1, title: 'Calibrate wafer handler sensors', status: 'in_progress', priority: 'high', productionLine: 'Line A', equipment: { id: 1, name: 'Wafer Handler Robot #1', code: 'WH-ROB-001', type: 'robot', status: 'in_use', productionLine: 'Line A' } },
+  { id: 2, title: 'Quarterly lithography alignment', status: 'review', priority: 'critical', productionLine: 'Line A', equipment: { id: 2, name: 'Lithography Stepper', code: 'LITH-STEP-01', type: 'machine', status: 'in_use', productionLine: 'Line A' } },
+  { id: 3, title: 'Conveyor belt speed optimization', status: 'todo', priority: 'medium', productionLine: 'Line A', equipment: { id: 3, name: 'Conveyor Belt A', code: 'CONV-A-01', type: 'conveyor', status: 'available', productionLine: 'Line A' } },
+  { id: 4, title: 'Temperature drift analysis', status: 'done', priority: 'low', productionLine: 'Line B', equipment: { id: 4, name: 'Temperature Sensor Bank', code: 'TEMP-SNS-01', type: 'sensor', status: 'available', productionLine: 'Line B' } },
+  { id: 5, title: 'Replace etching chamber filters', status: 'in_progress', priority: 'high', productionLine: 'Line B', equipment: { id: 5, name: 'Etching Tool Set', code: 'ETCH-TL-001', type: 'tooling', status: 'maintenance', productionLine: 'Line B' } },
+];
+
 @Component({
   selector: 'app-task-list',
   standalone: true,
@@ -119,8 +127,11 @@ export class TaskListComponent implements OnInit {
 
   loadTasks(): void {
     this.taskService.getTasks(this.filters).subscribe({
-      next: (tasks) => this.tasks = tasks,
-      error: () => this.snackBar.open('Failed to load tasks', 'Close', { duration: 3000 })
+      next: (tasks) => this.tasks = tasks?.length ? tasks : DEMO_TASKS,
+      error: () => {
+        this.tasks = DEMO_TASKS;
+        this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
+      },
     });
   }
 

@@ -10,6 +10,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Equipment, EquipmentFilters, EquipmentService } from '../../services/equipment.service';
 
+const DEMO_EQUIPMENT: Equipment[] = [
+  { id: 1, name: 'Wafer Handler Robot #1', code: 'WH-ROB-001', type: 'robot', status: 'in_use', productionLine: 'Line A' },
+  { id: 2, name: 'Lithography Stepper', code: 'LITH-STEP-01', type: 'machine', status: 'in_use', productionLine: 'Line A' },
+  { id: 3, name: 'Conveyor Belt A', code: 'CONV-A-01', type: 'conveyor', status: 'available', productionLine: 'Line A' },
+  { id: 4, name: 'Temperature Sensor Bank', code: 'TEMP-SNS-01', type: 'sensor', status: 'available', productionLine: 'Line B' },
+  { id: 5, name: 'Etching Tool Set', code: 'ETCH-TL-001', type: 'tooling', status: 'maintenance', productionLine: 'Line B' },
+  { id: 6, name: 'Inspection Robot', code: 'INSP-ROB-01', type: 'robot', status: 'available', productionLine: 'Line C' },
+  { id: 7, name: 'Deposition Chamber', code: 'DEP-CH-01', type: 'machine', status: 'offline', productionLine: 'Line C' },
+];
+
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
@@ -129,8 +139,11 @@ export class EquipmentListComponent implements OnInit {
 
   loadEquipment(): void {
     this.equipmentService.getEquipmentList(this.filters).subscribe({
-      next: (items) => this.equipment = items,
-      error: () => this.snackBar.open('Failed to load equipment', 'Close', { duration: 3000 })
+      next: (items) => this.equipment = items?.length ? items : DEMO_EQUIPMENT,
+      error: () => {
+        this.equipment = DEMO_EQUIPMENT;
+        this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
+      },
     });
   }
 

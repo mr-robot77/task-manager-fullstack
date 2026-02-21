@@ -5,6 +5,7 @@ colorFrom: blue
 colorTo: indigo
 sdk: gradio
 sdk_version: "4.44.0"
+python_version: "3.11"
 app_file: app.py
 pinned: false
 ---
@@ -32,16 +33,18 @@ Then open: <http://localhost:7860>
 
 ## Deploy to Hugging Face (one command)
 
-From the project root, with a valid HF token:
+From the project root. Token can be provided via:
+
+1. **Environment:** `$env:HF_TOKEN = "hf_xxx"`
+2. **Project `.env`:** Create `.env` in project root with `HF_TOKEN=hf_xxx` (file is gitignored)
+3. **Login:** `huggingface-cli login` (then run without HF_TOKEN)
 
 ```powershell
-# Get token from https://huggingface.co/settings/tokens
-$env:HF_TOKEN = "hf_xxxxxxxx"
 pip install huggingface_hub
 python hf-dashboard/deploy_to_hf.py
 ```
 
-This uploads `README.md`, `app.py`, `requirements.txt`, sets `BACKEND_API_BASE`, and restarts the Space.
+This uploads `README.md`, `app.py`, `requirements.txt`, resolves any variable/secret name collision, sets `BACKEND_API_BASE`, and restarts the Space.
 
 ## Backend configuration (manual)
 
