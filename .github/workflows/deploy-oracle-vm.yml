@@ -55,17 +55,9 @@ jobs:
           host: ${{ secrets.ORACLE_VM_HOST }}
           username: ${{ secrets.ORACLE_VM_USER }}
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
-          source: "deploy/oracle/docker-compose.prod-images.yml"
+          source: "deploy/oracle/"
           target: "~/task-manager-fullstack/"
-
-      - name: Copy env example to VM
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.ORACLE_VM_HOST }}
-          username: ${{ secrets.ORACLE_VM_USER }}
-          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
-          source: "deploy/oracle/.env.prod.example"
-          target: "~/task-manager-fullstack/deploy/oracle/"
+          strip_components: 0
 
       - name: Load images and start stack
         uses: appleboy/ssh-action@v1.0.3
@@ -78,9 +70,9 @@ jobs:
             cd ~/task-manager-fullstack
             mkdir -p deploy/oracle
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod 2>/dev/null || touch deploy/oracle/.env.prod
-            COMPOSE_FILE="docker-compose.prod-images.yml"
-            [ -f "$COMPOSE_FILE" ] || COMPOSE_FILE="deploy/oracle/docker-compose.prod-images.yml"
-            [ -f "$COMPOSE_FILE" ] || { echo "ERROR: No compose file. Listing:"; ls -la; ls -la deploy/oracle/ 2>/dev/null; exit 1; }
+            COMPOSE_FILE="deploy/oracle/docker-compose.prod-images.yml"
+            [ -f "$COMPOSE_FILE" ] || COMPOSE_FILE="docker-compose.prod-images.yml"
+            [ -f "$COMPOSE_FILE" ] || { echo "ERROR: No compose file. Listing:"; ls -laR; exit 1; }
 
             echo "=== Using compose file: $COMPOSE_FILE ==="
 
