@@ -65,14 +65,39 @@ jobs:
           username: ${{ secrets.ORACLE_VM_USER }}
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
           script: |
+            set -e
             cd ~/task-manager-fullstack
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
+
+            echo "=== BEFORE: containers using port 4200 ==="
+            docker ps -a --filter "publish=4200" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" || true
+
+            echo "=== Stopping any container on port 4200 ==="
+            for cid in $(docker ps -q --filter "publish=4200"); do docker stop $cid; done || true
+
+            echo "=== Docker compose down ==="
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml down
+
+            echo "=== Loading images ==="
             docker load -i ~/images.tar
+            echo "=== oracle-frontend image after load ==="
+            docker images oracle-frontend:latest --format "{{.ID}} {{.CreatedAt}}"
+
+            echo "=== Docker compose up ==="
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml up -d --force-recreate
+
+            echo "=== Waiting 120s for backend ==="
             sleep 120
+
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
-            echo "--- Deploy verification ---"
+
+            echo "=== VERIFICATION: docker ps ==="
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml ps
-            curl -sS http://localhost:4200 | head -5 || true
-            echo "Deploy done. Frontend: http://<VM_IP>:4200"
+
+            echo "=== VERIFICATION: curl localhost:4200 (first 15 lines) ==="
+            curl -sS http://localhost:4200 2>/dev/null | head -15 || echo "curl failed"
+
+            echo "=== VERIFICATION: Build fingerprint in HTML? ==="
+            (curl -sS http://localhost:4200 2>/dev/null | grep -o "Build: [^>]*" || echo "Build fingerprint NOT FOUND")
+
+            echo "Deploy done."

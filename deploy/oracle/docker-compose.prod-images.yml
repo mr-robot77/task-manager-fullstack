@@ -1,4 +1,5 @@
 # Oracle VM deploy: pre-built backend/frontend images + MSSQL (all loaded via docker load, no pull on VM).
+name: taskmanager-prod
 services:
   database:
     image: mcr.microsoft.com/mssql/server:2019-latest
