@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.ORACLE_VM_USER }}
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
           script: |
-            if [ ! -d task-manager-fullstack ]; then git clone https://github.com/mr-robot77/task-manager-fullstack.git; fi
+            if [ ! -d task-manager-fullstack/.git ]; then rm -rf task-manager-fullstack; git clone https://github.com/mr-robot77/task-manager-fullstack.git; fi
             cd task-manager-fullstack
             git pull origin main
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
