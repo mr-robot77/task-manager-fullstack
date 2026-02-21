@@ -100,6 +100,16 @@ On first `docker compose up`, the backend entrypoint automatically:
 
 If the backend is unreachable, the frontend and HF dashboard display built-in demo fallback data.
 
+## Live URLs
+
+| Environment | Frontend | Backend API | Live Dashboard |
+|-------------|----------|-------------|----------------|
+| **Local** | `http://localhost:4200` | `http://localhost:8000/api` | — |
+| **Oracle VM** | `http://152.70.53.27:4200` | `http://152.70.53.27:8000/api` | — |
+| **Hugging Face** | — | — | [https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard](https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard) |
+
+The HF dashboard reads from the Oracle VM backend (`BACKEND_API_BASE`). Replace `152.70.53.27` with your VM IP if you deploy to a different host.
+
 ## Hybrid Live Deployment (Recommended Free Setup)
 
 Use this hybrid model for a stable free public demo:

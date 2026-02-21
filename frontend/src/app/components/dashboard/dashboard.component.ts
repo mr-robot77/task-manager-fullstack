@@ -61,13 +61,13 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
         <mat-card-content>
           <mat-icon>assignment</mat-icon>
           <div class="stat-info">
-            <span class="stat-number">{{ stats?.total || 0 }}</span>
+            <span class="stat-number">{{ stats.total }}</span>
             <span class="stat-label">Total Tasks</span>
           </div>
         </mat-card-content>
       </mat-card>
 
-      @for (s of stats?.byStatus; track s.status) {
+      @for (s of stats.byStatus; track s.status) {
         <mat-card class="stat-card" [class]="'status-' + s.status">
           <mat-card-content>
             <div class="stat-info">
@@ -81,7 +81,7 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
 
     <h2>By Priority</h2>
     <div class="stats-grid">
-      @for (p of stats?.byPriority; track p.priority) {
+      @for (p of stats.byPriority; track p.priority) {
         <mat-card class="stat-card" [class]="'priority-' + p.priority">
           <mat-card-content>
             <div class="stat-info">
@@ -95,7 +95,7 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
 
     <h2>By Production Line</h2>
     <div class="stats-grid">
-      @for (l of stats?.byProductionLine; track l.production_line) {
+      @for (l of stats.byProductionLine; track l.production_line) {
         <mat-card class="stat-card">
           <mat-card-content>
             <mat-icon>precision_manufacturing</mat-icon>
@@ -114,13 +114,13 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
         <mat-card-content>
           <mat-icon>precision_manufacturing</mat-icon>
           <div class="stat-info">
-            <span class="stat-number">{{ equipmentStats?.total || 0 }}</span>
+            <span class="stat-number">{{ equipmentStats.total }}</span>
             <span class="stat-label">Total Equipment</span>
           </div>
         </mat-card-content>
       </mat-card>
 
-      @for (e of equipmentStats?.byStatus; track e.status) {
+      @for (e of equipmentStats.byStatus; track e.status) {
         <mat-card class="stat-card" [class]="'equipment-' + e.status">
           <mat-card-content>
             <div class="stat-info">
@@ -134,7 +134,7 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
 
     <h2>Equipment by Type</h2>
     <div class="stats-grid">
-      @for (t of equipmentStats?.byType; track t.type) {
+      @for (t of equipmentStats.byType; track t.type) {
         <mat-card class="stat-card">
           <mat-card-content>
             <mat-icon>memory</mat-icon>
@@ -177,20 +177,20 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
   `]
 })
 export class DashboardComponent implements OnInit {
-  stats: TaskStatistics | null = null;
-  equipmentStats: EquipmentStatistics | null = null;
+  stats: TaskStatistics = DEMO_TASK_STATS;
+  equipmentStats: EquipmentStatistics = DEMO_EQUIPMENT_STATS;
 
   constructor(private taskService: TaskService, private equipmentService: EquipmentService) {}
 
   ngOnInit(): void {
     this.taskService.getStatistics().subscribe({
-      next: (data) => this.stats = this._hasData(data) ? data : DEMO_TASK_STATS,
-      error: () => (this.stats = DEMO_TASK_STATS),
+      next: (data) => { if (this._hasData(data)) this.stats = data; },
+      error: () => {},
     });
 
     this.equipmentService.getStatistics().subscribe({
-      next: (data) => this.equipmentStats = this._hasEquipmentData(data) ? data : DEMO_EQUIPMENT_STATS,
-      error: () => (this.equipmentStats = DEMO_EQUIPMENT_STATS),
+      next: (data) => { if (this._hasEquipmentData(data)) this.equipmentStats = data; },
+      error: () => {},
     });
   }
 

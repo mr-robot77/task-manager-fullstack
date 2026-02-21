@@ -12,6 +12,8 @@ pinned: false
 
 # Task Manager Live Dashboard
 
+**Live URL:** [https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard](https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard)
+
 A lightweight public dashboard for live task and equipment metrics. It fetches data from these backend endpoints:
 
 - `/api/tasks/statistics`
