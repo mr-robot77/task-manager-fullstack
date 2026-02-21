@@ -1,6 +1,6 @@
 # Oracle VM Auto-Deploy Setup
 
-To have GitHub Actions deploy to your Oracle VM on every push to `main`:
+Deploy uses **MSSQL** with pre-built images (backend, frontend, database) transferred via SCP. The VM does not need to pull from Docker Hub or MCR.
 
 ## 1. Add repository secrets
 

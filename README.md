@@ -44,7 +44,8 @@ A full-stack web application for managing production line tasks and equipment in
 
 ### Database
 
-- **Primary:** Microsoft SQL Server 2022 — local development and production (VM needs ≥2GB RAM).
+- **Primary:** Microsoft SQL Server — local development, CI smoke test (2019), and production (2022/2019). VM needs ≥2GB RAM for MSSQL.
+- **Smoke test:** Uses `mcr.microsoft.com/mssql/server:2019-latest` (MCR 2022 requires auth as of 2025).
 - **Demo fallback:** PostgreSQL 15 — only when VM has ~1GB RAM. Use `deploy/oracle/docker-compose.prod-pgsql.yml`. Production should use MSSQL.
 
 ## Features
@@ -262,7 +263,7 @@ Uses FirefoxHeadless. Run locally; not executed in CI (lint and build only).
 | Workflow      | Trigger                    | Steps                                                                 |
 |---------------|----------------------------|-----------------------------------------------------------------------|
 | **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, build. Docker build both images. (Karma tests run locally only.) |
-| **Smoke Test**    | Push/PR, daily cron, manual | Starts database + backend, runs doctrine init (TrustServerCertificate for ODBC 18), curls `/api/tasks/statistics` and `/api/equipment/statistics`. Backend uses `docker-entrypoint.sh` for auto-init; smoke test also runs manual init for compatibility. |
+| **Smoke Test**    | Push/PR, daily cron, manual | MSSQL 2019 + backend. Doctrine init (TrustServerCertificate), curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
 
 Artifacts: `backend-coverage` (clover XML).
 

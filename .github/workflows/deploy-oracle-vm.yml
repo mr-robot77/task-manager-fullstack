@@ -19,12 +19,14 @@ jobs:
       - name: Build frontend image
         run: docker build -t oracle-frontend:latest ./frontend
 
-      - name: Pull PostgreSQL image
-        run: docker pull postgres:15-alpine
+      - name: Pull MSSQL image
+        run: |
+          docker logout mcr.microsoft.com 2>/dev/null || true
+          docker pull mcr.microsoft.com/mssql/server:2019-latest
 
       - name: Save images to tarball
         run: |
-          docker save -o images.tar oracle-backend:latest oracle-frontend:latest postgres:15-alpine
+          docker save -o images.tar oracle-backend:latest oracle-frontend:latest mcr.microsoft.com/mssql/server:2019-latest
           chmod a+r images.tar
 
       - name: Prepare remote directory
@@ -51,7 +53,7 @@ jobs:
           host: ${{ secrets.ORACLE_VM_HOST }}
           username: ${{ secrets.ORACLE_VM_USER }}
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
-          source: "deploy/oracle/docker-compose.prod-pgsql.yml,deploy/oracle/.env.prod.example"
+          source: "deploy/oracle/docker-compose.prod-images.yml,deploy/oracle/.env.prod.example"
           target: "~/task-manager-fullstack/deploy/oracle/"
 
       - name: Load images and start stack
@@ -64,7 +66,7 @@ jobs:
             cd ~/task-manager-fullstack
             docker load -i ~/images.tar
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
-            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml up -d
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml up -d
             sleep 120
-            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
             echo "Deploy done. Frontend: http://152.70.53.27:4200"
