@@ -54,126 +54,234 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
   standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule],
   template: `
-    <h1>Production Line Dashboard</h1>
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>Production Line Dashboard</h1>
+        <p class="dashboard-subtitle">Overview of tasks and equipment status</p>
+      </header>
 
-    <div class="stats-grid">
-      <mat-card class="stat-card total">
-        <mat-card-content>
+      <section class="section-tasks">
+        <h2 class="section-title">
           <mat-icon>assignment</mat-icon>
-          <div class="stat-info">
-            <span class="stat-number">{{ stats.total }}</span>
-            <span class="stat-label">Total Tasks</span>
+          Tasks
+        </h2>
+        <div class="kpi-row">
+          <div class="kpi-card kpi-primary">
+            <span class="kpi-value">{{ stats.total }}</span>
+            <span class="kpi-label">Total Tasks</span>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      @for (s of stats.byStatus; track s.status) {
-        <mat-card class="stat-card" [class]="'status-' + s.status">
-          <mat-card-content>
-            <div class="stat-info">
-              <span class="stat-number">{{ s.count }}</span>
-              <span class="stat-label">{{ formatLabel(s.status) }}</span>
+          @for (s of stats.byStatus; track s.status) {
+            <div class="kpi-card" [class]="'status-' + s.status">
+              <span class="kpi-value">{{ s.count }}</span>
+              <span class="kpi-label">{{ formatLabel(s.status) }}</span>
             </div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-
-    <h2>By Priority</h2>
-    <div class="stats-grid">
-      @for (p of stats.byPriority; track p.priority) {
-        <mat-card class="stat-card" [class]="'priority-' + p.priority">
-          <mat-card-content>
-            <div class="stat-info">
-              <span class="stat-number">{{ p.count }}</span>
-              <span class="stat-label">{{ p.priority | uppercase }}</span>
+          }
+        </div>
+        <div class="breakdown-grid">
+          <div class="breakdown-card">
+            <h3>By Priority</h3>
+            <div class="breakdown-list">
+              @for (p of stats.byPriority; track p.priority) {
+                <div class="breakdown-item" [class]="'priority-' + p.priority">
+                  <span class="breakdown-label">{{ p.priority | uppercase }}</span>
+                  <span class="breakdown-value">{{ p.count }}</span>
+                </div>
+              }
             </div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-
-    <h2>By Production Line</h2>
-    <div class="stats-grid">
-      @for (l of stats.byProductionLine; track l.production_line) {
-        <mat-card class="stat-card">
-          <mat-card-content>
-            <mat-icon>precision_manufacturing</mat-icon>
-            <div class="stat-info">
-              <span class="stat-number">{{ l.count }}</span>
-              <span class="stat-label">{{ l.production_line }}</span>
+          </div>
+          <div class="breakdown-card">
+            <h3>By Production Line</h3>
+            <div class="breakdown-list">
+              @for (l of stats.byProductionLine; track l.production_line) {
+                <div class="breakdown-item">
+                  <span class="breakdown-label">{{ l.production_line }}</span>
+                  <span class="breakdown-value">{{ l.count }}</span>
+                </div>
+              }
             </div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
+          </div>
+        </div>
+      </section>
 
-    <h2>Equipment Overview</h2>
-    <div class="stats-grid">
-      <mat-card class="stat-card total">
-        <mat-card-content>
+      <section class="section-equipment">
+        <h2 class="section-title">
           <mat-icon>precision_manufacturing</mat-icon>
-          <div class="stat-info">
-            <span class="stat-number">{{ equipmentStats.total }}</span>
-            <span class="stat-label">Total Equipment</span>
+          Equipment
+        </h2>
+        <div class="kpi-row">
+          <div class="kpi-card kpi-primary">
+            <span class="kpi-value">{{ equipmentStats.total }}</span>
+            <span class="kpi-label">Total Equipment</span>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      @for (e of equipmentStats.byStatus; track e.status) {
-        <mat-card class="stat-card" [class]="'equipment-' + e.status">
-          <mat-card-content>
-            <div class="stat-info">
-              <span class="stat-number">{{ e.count }}</span>
-              <span class="stat-label">{{ formatLabel(e.status) }}</span>
+          @for (e of equipmentStats.byStatus; track e.status) {
+            <div class="kpi-card" [class]="'equipment-' + e.status">
+              <span class="kpi-value">{{ e.count }}</span>
+              <span class="kpi-label">{{ formatLabel(e.status) }}</span>
             </div>
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-
-    <h2>Equipment by Type</h2>
-    <div class="stats-grid">
-      @for (t of equipmentStats.byType; track t.type) {
-        <mat-card class="stat-card">
-          <mat-card-content>
-            <mat-icon>memory</mat-icon>
-            <div class="stat-info">
-              <span class="stat-number">{{ t.count }}</span>
-              <span class="stat-label">{{ t.type | uppercase }}</span>
+          }
+        </div>
+        <div class="breakdown-grid">
+          <div class="breakdown-card">
+            <h3>By Type</h3>
+            <div class="breakdown-list">
+              @for (t of equipmentStats.byType; track t.type) {
+                <div class="breakdown-item">
+                  <span class="breakdown-label">{{ t.type | uppercase }}</span>
+                  <span class="breakdown-value">{{ t.count }}</span>
+                </div>
+              }
             </div>
-          </mat-card-content>
-        </mat-card>
-      }
+          </div>
+          <div class="breakdown-card">
+            <h3>Equipment by Line</h3>
+            <div class="breakdown-list">
+              @for (el of (equipmentStats.byProductionLine || []); track el.production_line) {
+                <div class="breakdown-item">
+                  <span class="breakdown-label">{{ el.production_line }}</span>
+                  <span class="breakdown-value">{{ el.count }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   `,
   styles: [`
-    .stats-grid {
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+    }
+    .dashboard-header {
+      margin-bottom: 32px;
+    }
+    .dashboard-header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.02em;
+    }
+    .dashboard-subtitle {
+      font-size: 0.9375rem;
+      color: #64748b;
+      margin: 0;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #334155;
+      margin: 0 0 16px 0;
+    }
+    .section-title mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      color: #6366f1;
+    }
+    .section-tasks, .section-equipment {
+      margin-bottom: 40px;
+    }
+    .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
       margin-bottom: 24px;
     }
-    .stat-card mat-card-content {
-      display: flex; align-items: center; gap: 12px; padding: 16px;
+    .kpi-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      transition: box-shadow 0.2s;
     }
-    .stat-info { display: flex; flex-direction: column; }
-    .stat-number { font-size: 2rem; font-weight: bold; }
-    .stat-label { font-size: 0.85rem; color: #666; }
-    .total { background: #e3f2fd; }
-    .status-todo { border-left: 4px solid #2196f3; }
-    .status-in_progress { border-left: 4px solid #ff9800; }
-    .status-review { border-left: 4px solid #9c27b0; }
-    .status-done { border-left: 4px solid #4caf50; }
-    .priority-critical { border-left: 4px solid #f44336; }
-    .priority-high { border-left: 4px solid #ff9800; }
-    .priority-medium { border-left: 4px solid #2196f3; }
-    .priority-low { border-left: 4px solid #4caf50; }
-    .equipment-available { border-left: 4px solid #4caf50; }
-    .equipment-in_use { border-left: 4px solid #2196f3; }
-    .equipment-maintenance { border-left: 4px solid #ff9800; }
-    .equipment-offline { border-left: 4px solid #f44336; }
-    mat-icon { font-size: 32px; width: 32px; height: 32px; color: #1976d2; }
+    .kpi-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .kpi-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: #fff;
+      border: none;
+    }
+    .kpi-primary .kpi-label { color: rgba(255,255,255,0.9); }
+    .kpi-value {
+      display: block;
+      font-size: 1.875rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #1a1a2e;
+    }
+    .kpi-label {
+      font-size: 0.8125rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .kpi-card.status-todo { border-left: 4px solid #3b82f6; }
+    .kpi-card.status-in_progress { border-left: 4px solid #f59e0b; }
+    .kpi-card.status-review { border-left: 4px solid #8b5cf6; }
+    .kpi-card.status-done { border-left: 4px solid #22c55e; }
+    .kpi-card.priority-critical { border-left: 4px solid #ef4444; }
+    .kpi-card.priority-high { border-left: 4px solid #f59e0b; }
+    .kpi-card.priority-medium { border-left: 4px solid #3b82f6; }
+    .kpi-card.priority-low { border-left: 4px solid #22c55e; }
+    .kpi-card.equipment-available { border-left: 4px solid #22c55e; }
+    .kpi-card.equipment-in_use { border-left: 4px solid #3b82f6; }
+    .kpi-card.equipment-maintenance { border-left: 4px solid #f59e0b; }
+    .kpi-card.equipment-offline { border-left: 4px solid #ef4444; }
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .breakdown-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+    }
+    .breakdown-card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .breakdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .breakdown-label {
+      font-size: 0.9375rem;
+      color: #334155;
+    }
+    .breakdown-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+    .breakdown-item.priority-critical .breakdown-value { color: #ef4444; }
+    .breakdown-item.priority-high .breakdown-value { color: #f59e0b; }
+    .breakdown-item.priority-medium .breakdown-value { color: #3b82f6; }
+    .breakdown-item.priority-low .breakdown-value { color: #22c55e; }
   `]
 })
 export class DashboardComponent implements OnInit {

@@ -19,7 +19,7 @@ A lightweight public dashboard for live task and equipment metrics. It fetches d
 - `/api/tasks/statistics`
 - `/api/equipment/statistics`
 
-**Demo fallback:** When the backend is unreachable or returns empty data, built-in demo statistics are displayed so the dashboard always shows sample charts and tables.
+**Demo fallback:** When the backend is unreachable or returns empty data, built-in demo statistics are displayed. Statistics are shown in readable tables (Tasks: by status, priority, production line; Equipment: by status, type, production line)—no charts, for reliable display across platforms.
 
 ## Run locally
 
