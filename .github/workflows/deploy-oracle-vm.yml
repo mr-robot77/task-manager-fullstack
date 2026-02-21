@@ -23,7 +23,9 @@ jobs:
         run: docker pull postgres:15-alpine
 
       - name: Save images to tarball
-        run: docker save -o images.tar oracle-backend:latest oracle-frontend:latest postgres:15-alpine
+        run: |
+          docker save -o images.tar oracle-backend:latest oracle-frontend:latest postgres:15-alpine
+          chmod a+r images.tar
 
       - name: Prepare remote directory
         uses: appleboy/ssh-action@v1.0.3
