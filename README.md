@@ -223,7 +223,7 @@ For production, use `deploy/oracle/.env.prod` and set strong secrets.
 │   └── deploy_to_hf.py        # Upload + configure HF Space
 │
 ├── docker-compose.yml          # Local dev: database, backend, frontend
-└── .github/workflows/          # ci.yml, smoke-test.yml
+└── .github/workflows/          # ci.yml, smoke-test.yml, deploy-oracle-vm.yml
 ```
 
 ## Development
@@ -264,12 +264,19 @@ npm run test:ci
 
 Uses FirefoxHeadless. Run locally; not executed in CI (lint and build only).
 
+## Troubleshooting
+
+### Backend container exits: "no such file or directory" (entrypoint)
+
+On Windows, Git may check out shell scripts with CRLF line endings. The backend Dockerfile runs `sed` to strip CRLF from `docker-entrypoint.sh`. `.gitattributes` enforces LF for `*.sh`. If you still see this error, run `git add --renormalize .` and rebuild.
+
 ## CI/CD
 
 | Workflow      | Trigger                    | Steps                                                                 |
 |---------------|----------------------------|-----------------------------------------------------------------------|
 | **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, build. Docker build both images. (Karma tests run locally only.) |
-| **Smoke Test**    | Push/PR, daily cron, manual | MSSQL 2019 + backend. Doctrine init (TrustServerCertificate), curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
+| **Smoke Test**    | Push/PR, daily cron, manual | PostgreSQL + backend (`docker-compose.smoke.yml`). Doctrine init, curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
+| **Deploy Oracle VM** | Manual (workflow_dispatch) | Builds images on GitHub, SCPs to VM, uses `docker-compose.prod-images.yml` with MSSQL. |
 
 Artifacts: `backend-coverage` (clover XML).
 
