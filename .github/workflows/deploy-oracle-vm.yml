@@ -90,9 +90,15 @@ jobs:
             docker images oracle-frontend:latest --format "{{.ID}} {{.CreatedAt}}"
 
             echo "=== Docker compose up (database needs ~90s to become healthy) ==="
-            docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" up -d --force-recreate
+            if ! docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" up -d --force-recreate; then
+              echo "=== Compose up failed. Database logs: ==="
+              docker logs taskmanager-prod-database-1 --tail 50 2>&1 || true
+              echo "=== Container status ==="
+              docker ps -a --filter "name=taskmanager-prod" --format "table {{.Names}}\t{{.Status}}"
+              exit 1
+            fi
 
-            echo "=== Waiting 180s for database+backend+frontend ==="
+            echo "=== Waiting 180s for backend+frontend ==="
             sleep 180
 
             docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" exec -T backend php bin/console app:load-demo-data --no-interaction || true
