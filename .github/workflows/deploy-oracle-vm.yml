@@ -1,0 +1,27 @@
+name: Deploy to Oracle VM
+
+# Requires: Repository secrets ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY
+# See deploy/oracle/DEPLOY-SETUP.md — then run via Actions → Deploy to Oracle VM → Run workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            if [ ! -d task-manager-fullstack ]; then git clone https://github.com/mr-robot77/task-manager-fullstack.git; fi
+            cd task-manager-fullstack
+            git pull origin main
+            [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
+            sleep 90
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
+            echo "Deploy done. Frontend: http://$(curl -s ifconfig.me):4200"
