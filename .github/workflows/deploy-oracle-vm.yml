@@ -17,7 +17,9 @@ jobs:
         run: docker build -t oracle-backend:latest ./backend
 
       - name: Build frontend image
-        run: docker build --no-cache -t oracle-frontend:latest ./frontend
+        run: |
+          BUILD_VER=$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M)
+          docker build --no-cache --build-arg BUILD_VERSION="$BUILD_VER" -t oracle-frontend:latest ./frontend
 
       - name: Pull MSSQL image
         run: |
@@ -70,4 +72,7 @@ jobs:
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml up -d --force-recreate
             sleep 120
             docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
-            echo "Deploy done. Frontend: http://152.70.53.27:4200"
+            echo "--- Deploy verification ---"
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-images.yml ps
+            curl -sS http://localhost:4200 | head -5 || true
+            echo "Deploy done. Frontend: http://<VM_IP>:4200"
