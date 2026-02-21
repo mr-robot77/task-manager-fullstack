@@ -191,7 +191,7 @@ export class DashboardComponent implements OnInit {
     this.taskService.getStatistics().subscribe({
       next: (data) => {
         if (this._hasData(data)) {
-          this.stats = data;
+          this.stats = this._normalizeTaskStats(data);
           this.cdr.detectChanges();
         }
       },
@@ -201,12 +201,30 @@ export class DashboardComponent implements OnInit {
     this.equipmentService.getStatistics().subscribe({
       next: (data) => {
         if (this._hasEquipmentData(data)) {
-          this.equipmentStats = data;
+          this.equipmentStats = this._normalizeEquipmentStats(data);
           this.cdr.detectChanges();
         }
       },
       error: () => {},
     });
+  }
+
+  private _normalizeTaskStats(data: TaskStatistics): TaskStatistics {
+    return {
+      total: Number(data.total) || 0,
+      byStatus: (data.byStatus ?? []).map((s) => ({ status: s.status, count: Number(s.count) || 0 })),
+      byPriority: (data.byPriority ?? []).map((p) => ({ priority: p.priority, count: Number(p.count) || 0 })),
+      byProductionLine: (data.byProductionLine ?? []).map((l) => ({ production_line: l.production_line, count: Number(l.count) || 0 })),
+    };
+  }
+
+  private _normalizeEquipmentStats(data: EquipmentStatistics): EquipmentStatistics {
+    return {
+      total: Number(data.total) || 0,
+      byStatus: (data.byStatus ?? []).map((s) => ({ status: s.status, count: Number(s.count) || 0 })),
+      byType: (data.byType ?? []).map((t) => ({ type: t.type, count: Number(t.count) || 0 })),
+      byProductionLine: (data.byProductionLine ?? []).map((l) => ({ production_line: l.production_line, count: Number(l.count) || 0 })),
+    };
   }
 
   private _hasData(s: TaskStatistics | null): boolean {
