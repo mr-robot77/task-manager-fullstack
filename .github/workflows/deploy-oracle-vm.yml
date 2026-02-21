@@ -89,11 +89,11 @@ jobs:
             docker load -i ~/images.tar
             docker images oracle-frontend:latest --format "{{.ID}} {{.CreatedAt}}"
 
-            echo "=== Docker compose up ==="
+            echo "=== Docker compose up (database needs ~90s to become healthy) ==="
             docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" up -d --force-recreate
 
-            echo "=== Waiting 120s for backend ==="
-            sleep 120
+            echo "=== Waiting 180s for database+backend+frontend ==="
+            sleep 180
 
             docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" exec -T backend php bin/console app:load-demo-data --no-interaction || true
 
