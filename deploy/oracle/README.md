@@ -82,9 +82,27 @@ docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compos
 
 **Demo login:** `demo@example.com` / `demodemo`
 
-## 5) Verify
+## 5) Sync with latest (after git push)
 
-- **Frontend:** `http://<VM_PUBLIC_IP>:4200`
+To update the Oracle VM with the latest code and load demo data:
+
+```bash
+cd task-manager-fullstack
+chmod +x deploy/oracle/sync-and-deploy.sh
+./deploy/oracle/sync-and-deploy.sh
+```
+
+Or manually:
+```bash
+git pull origin main
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
+# After backend is healthy (~2 min):
+docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data
+```
+
+## 6) Verify
+
+- **Frontend:** `http://<VM_PUBLIC_IP>:4200/dashboard`
 - **Backend API:** `http://<VM_PUBLIC_IP>:8000/api`
 
 **Example (Oracle VM):** `http://152.70.53.27:4200` (frontend), `http://152.70.53.27:8000/api` (backend).

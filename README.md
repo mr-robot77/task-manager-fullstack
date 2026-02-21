@@ -106,6 +106,8 @@ If the backend is unreachable, the frontend and HF dashboard display built-in de
 |-------------|----------|-------------|----------------|
 | **Local** | `http://localhost:4200` | `http://localhost:8000/api` | — |
 | **Oracle VM** | `http://152.70.53.27:4200` | `http://152.70.53.27:8000/api` | — |
+
+> **If Oracle VM dashboard shows zeros:** Pull latest code and run `./deploy/oracle/sync-and-deploy.sh` on the VM.
 | **Hugging Face** | — | — | [https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard](https://huggingface.co/spaces/mrrobot777/task-manager-live-dashboard) |
 
 The HF dashboard reads from the Oracle VM backend (`BACKEND_API_BASE`). Replace `152.70.53.27` with your VM IP if you deploy to a different host.
