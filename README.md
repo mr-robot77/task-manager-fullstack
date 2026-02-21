@@ -44,9 +44,9 @@ A full-stack web application for managing production line tasks and equipment in
 
 ### Database
 
-- **Primary:** Microsoft SQL Server — local development, CI smoke test (2019), and production (2022/2019). VM needs ≥2GB RAM for MSSQL.
-- **Smoke test:** Uses `mcr.microsoft.com/mssql/server:2019-latest` (MCR 2022 requires auth as of 2025).
-- **Demo fallback:** PostgreSQL 15 — only when VM has ~1GB RAM. Use `deploy/oracle/docker-compose.prod-pgsql.yml`. Production should use MSSQL.
+- **Primary:** Microsoft SQL Server — local development and production (2022/2019). VM needs ≥2GB RAM for MSSQL.
+- **Smoke test / Local fallback:** PostgreSQL 15 via `docker-compose.smoke.yml` — MCR now requires auth for MSSQL pulls in CI; use PostgreSQL for smoke test and local dev when MSSQL is unavailable.
+- **Demo fallback:** PostgreSQL 15 — for VM with ~1GB RAM. Use `deploy/oracle/docker-compose.prod-pgsql.yml`. Production should use MSSQL.
 
 ## Features
 
@@ -74,6 +74,12 @@ A full-stack web application for managing production line tasks and equipment in
 git clone https://github.com/mr-robot77/task-manager-fullstack.git
 cd task-manager-fullstack
 docker compose up --build
+```
+
+**If MSSQL image fails to pull** (MCR auth required), use PostgreSQL instead:
+
+```bash
+docker compose -f docker-compose.smoke.yml up --build
 ```
 
 Wait for the backend healthcheck to pass (about 90 seconds on first run). Then:

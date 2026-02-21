@@ -55,6 +55,16 @@ const DEMO_TASKS: Task[] = [
           <mat-option value="critical">Critical</mat-option>
         </mat-select>
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>Production Line</mat-label>
+        <mat-select [(ngModel)]="filters.productionLine" (selectionChange)="loadTasks()">
+          <mat-option value="">All</mat-option>
+          <mat-option value="Line A">Line A</mat-option>
+          <mat-option value="Line B">Line B</mat-option>
+          <mat-option value="Line C">Line C</mat-option>
+          <mat-option value="General">General</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
     <table mat-table [dataSource]="tasks" class="mat-elevation-z4 full-width">
@@ -127,11 +137,20 @@ export class TaskListComponent implements OnInit {
 
   loadTasks(): void {
     this.taskService.getTasks(this.filters).subscribe({
-      next: (tasks) => this.tasks = tasks?.length ? tasks : DEMO_TASKS,
+      next: (tasks) => this.tasks = tasks?.length ? tasks : this.filterDemoTasks(),
       error: () => {
-        this.tasks = DEMO_TASKS;
+        this.tasks = this.filterDemoTasks();
         this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
       },
+    });
+  }
+
+  private filterDemoTasks(): Task[] {
+    return DEMO_TASKS.filter((t) => {
+      if (this.filters.status && t.status !== this.filters.status) return false;
+      if (this.filters.priority && t.priority !== this.filters.priority) return false;
+      if (this.filters.productionLine && t.productionLine !== this.filters.productionLine) return false;
+      return true;
     });
   }
 

@@ -17,17 +17,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start backend stack for smoke test
-        run: |
-          docker logout mcr.microsoft.com 2>/dev/null || true
-          docker compose up --build -d database backend
+        run: docker compose -f docker-compose.smoke.yml up --build -d database backend
 
-      - name: Wait for MSSQL and prepare database
+      - name: Wait for PostgreSQL and prepare database
         run: |
-          echo "Waiting for MSSQL (healthcheck start_period 30s)..."
-          sleep 55
-          docker compose exec -T backend php bin/console doctrine:database:create --if-not-exists
-          docker compose exec -T backend php bin/console doctrine:schema:update --force
-          docker compose exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
+          echo "Waiting for PostgreSQL..."
+          sleep 40
+          docker compose -f docker-compose.smoke.yml exec -T backend php bin/console doctrine:database:create --if-not-exists
+          docker compose -f docker-compose.smoke.yml exec -T backend php bin/console doctrine:schema:update --force
+          docker compose -f docker-compose.smoke.yml exec -T backend php bin/console lexik:jwt:generate-keypair --skip-if-exists
 
       - name: Smoke test backend statistics endpoint
         run: |
@@ -54,9 +52,9 @@ jobs:
       - name: Print service logs on failure
         if: failure()
         run: |
-          docker compose ps
-          docker compose logs backend --tail 100
+          docker compose -f docker-compose.smoke.yml ps
+          docker compose -f docker-compose.smoke.yml logs backend --tail 100
 
       - name: Stop smoke test stack
         if: always()
-        run: docker compose down -v
+        run: docker compose -f docker-compose.smoke.yml down -v

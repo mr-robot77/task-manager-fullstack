@@ -59,6 +59,15 @@ const DEMO_EQUIPMENT: Equipment[] = [
           <mat-option value="tooling">Tooling</mat-option>
         </mat-select>
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>Production Line</mat-label>
+        <mat-select [(ngModel)]="filters.productionLine" (selectionChange)="loadEquipment()">
+          <mat-option value="">All</mat-option>
+          <mat-option value="Line A">Line A</mat-option>
+          <mat-option value="Line B">Line B</mat-option>
+          <mat-option value="Line C">Line C</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
     <table mat-table [dataSource]="equipment" class="mat-elevation-z4 full-width">
@@ -139,11 +148,20 @@ export class EquipmentListComponent implements OnInit {
 
   loadEquipment(): void {
     this.equipmentService.getEquipmentList(this.filters).subscribe({
-      next: (items) => this.equipment = items?.length ? items : DEMO_EQUIPMENT,
+      next: (items) => this.equipment = items?.length ? items : this.filterDemoEquipment(),
       error: () => {
-        this.equipment = DEMO_EQUIPMENT;
+        this.equipment = this.filterDemoEquipment();
         this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
       },
+    });
+  }
+
+  private filterDemoEquipment(): Equipment[] {
+    return DEMO_EQUIPMENT.filter((e) => {
+      if (this.filters.status && e.status !== this.filters.status) return false;
+      if (this.filters.type && e.type !== this.filters.type) return false;
+      if (this.filters.productionLine && e.productionLine !== this.filters.productionLine) return false;
+      return true;
     });
   }
 

@@ -35,7 +35,9 @@ python app.py
 
 Then open: <http://localhost:7860>
 
-## Deploy to Hugging Face (one command)
+## Deploy to Hugging Face (push latest app to Space)
+
+**After making changes to `app.py` or other files, run this to update the live Space:**
 
 From the project root. Token can be provided via:
 
