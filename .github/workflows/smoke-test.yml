@@ -17,7 +17,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start backend stack for smoke test
-        run: docker compose up --build -d database backend
+        run: |
+          docker logout mcr.microsoft.com 2>/dev/null || true
+          docker compose up --build -d database backend
 
       - name: Wait for MSSQL and prepare database
         run: |
