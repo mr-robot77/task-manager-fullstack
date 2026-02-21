@@ -1,27 +1,68 @@
 name: Deploy to Oracle VM
 
-# Requires: Repository secrets ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY
-# See deploy/oracle/DEPLOY-SETUP.md — then run via Actions → Deploy to Oracle VM → Run workflow
+# Builds images on GitHub (no Docker Hub needed on VM), SCPs to VM, loads and runs.
+# Requires: ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY
 on:
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
-      - name: Deploy via SSH
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t oracle-backend:latest ./backend
+
+      - name: Build frontend image
+        run: docker build -t oracle-frontend:latest ./frontend
+
+      - name: Pull PostgreSQL image
+        run: docker pull postgres:15-alpine
+
+      - name: Save images to tarball
+        run: docker save -o images.tar oracle-backend:latest oracle-frontend:latest postgres:15-alpine
+
+      - name: Prepare remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: mkdir -p ~/task-manager-fullstack/deploy/oracle
+
+      - name: Copy images to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          source: "images.tar"
+          target: "~/"
+          command_timeout: 20m
+
+      - name: Copy deploy config to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          source: "deploy/oracle/docker-compose.prod-pgsql.yml,deploy/oracle/.env.prod.example"
+          target: "~/task-manager-fullstack/deploy/oracle/"
+
+      - name: Load images and start stack
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_VM_HOST }}
           username: ${{ secrets.ORACLE_VM_USER }}
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
           script: |
-            if [ ! -d task-manager-fullstack/.git ]; then rm -rf task-manager-fullstack; git clone https://github.com/mr-robot77/task-manager-fullstack.git; fi
-            cd task-manager-fullstack
-            git pull origin main
+            cd ~/task-manager-fullstack
+            docker load -i ~/images.tar
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod
-            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml up -d --build
-            sleep 90
-            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
-            echo "Deploy done. Frontend: http://$(curl -s ifconfig.me):4200"
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml up -d
+            sleep 120
+            docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compose.prod-pgsql.yml exec -T backend php bin/console app:load-demo-data --no-interaction || true
+            echo "Deploy done. Frontend: http://152.70.53.27:4200"
