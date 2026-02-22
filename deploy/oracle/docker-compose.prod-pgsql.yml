@@ -7,8 +7,7 @@ services:
       POSTGRES_DB: task_manager
       POSTGRES_USER: taskmanager
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
-    ports:
-      - "127.0.0.1:5432:5432"
+    # No port expose - backend connects via Docker network (database:5432). Avoids conflict with host port 5432.
     volumes:
       - pgsql_data:/var/lib/postgresql/data
     healthcheck:
