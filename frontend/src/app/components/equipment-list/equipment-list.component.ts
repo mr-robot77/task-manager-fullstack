@@ -151,7 +151,7 @@ export class EquipmentListComponent implements OnInit {
       next: (items) => this.equipment = items?.length ? items : this.filterDemoEquipment(),
       error: () => {
         this.equipment = this.filterDemoEquipment();
-        this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
+        this.snackBar.open('Using demo data', 'Close', { duration: 2000 });
       },
     });
   }

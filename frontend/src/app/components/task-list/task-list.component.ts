@@ -140,7 +140,7 @@ export class TaskListComponent implements OnInit {
       next: (tasks) => this.tasks = tasks?.length ? tasks : this.filterDemoTasks(),
       error: () => {
         this.tasks = this.filterDemoTasks();
-        this.snackBar.open('Showing demo data (backend unavailable)', 'Close', { duration: 3000 });
+        this.snackBar.open('Using demo data', 'Close', { duration: 2000 });
       },
     });
   }

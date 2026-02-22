@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { retry, timer } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export type EquipmentType = 'machine' | 'robot' | 'conveyor' | 'sensor' | 'tooling';
@@ -46,7 +47,9 @@ export class EquipmentService {
     if (filters?.status) params = params.set('status', filters.status);
     if (filters?.type) params = params.set('type', filters.type);
     if (filters?.productionLine) params = params.set('productionLine', filters.productionLine);
-    return this.http.get<Equipment[]>(this.apiUrl, { params });
+    return this.http.get<Equipment[]>(this.apiUrl, { params }).pipe(
+      retry({ count: 2, delay: () => timer(1500) })
+    );
   }
 
   getEquipment(id: number): Observable<Equipment> {

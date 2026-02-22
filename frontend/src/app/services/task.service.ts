@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { retry, timer } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Task {
@@ -55,7 +56,9 @@ export class TaskService {
     if (filters?.status) params = params.set('status', filters.status);
     if (filters?.priority) params = params.set('priority', filters.priority);
     if (filters?.productionLine) params = params.set('productionLine', filters.productionLine);
-    return this.http.get<Task[]>(this.apiUrl, { params });
+    return this.http.get<Task[]>(this.apiUrl, { params }).pipe(
+      retry({ count: 2, delay: () => timer(1500) })
+    );
   }
 
   getTask(id: number): Observable<Task> {

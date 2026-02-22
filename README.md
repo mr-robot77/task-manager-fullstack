@@ -106,7 +106,7 @@ On first `docker compose up`, the backend entrypoint automatically:
 
 **Demo login:** `demo@example.com` / `demodemo` — no manual login required; the frontend auto-authenticates on first visit.
 
-If the backend is unreachable, the frontend and HF dashboard display built-in demo fallback data.
+If the backend is unreachable, the frontend retries API calls (2 retries, 1.5s delay) and then shows built-in demo fallback data with a brief "Using demo data" message.
 
 ## Live URLs
 
@@ -129,7 +129,7 @@ Use this hybrid model for a stable free public demo:
 
 ### 1) Deploy full stack to Oracle VM
 
-See complete steps in `deploy/oracle/README.md`. By default use MSSQL (2GB+ RAM). For demo only on 1GB RAM VMs, use the PostgreSQL compose file.
+See complete steps in `deploy/oracle/README.md`. The GitHub Actions workflow uses PostgreSQL (`docker-compose.prod-pgsql.yml`) because Oracle Always Free VMs have ~1GB RAM and MSSQL requires ≥2GB. No database port is exposed to the host (avoids conflict with local PostgreSQL on 5432). Before starting, the workflow stops any containers using ports 4200 or 8000.
 
 ### 2) Deploy public dashboard to Hugging Face Spaces
 
@@ -267,6 +267,10 @@ Uses FirefoxHeadless. Run locally; not executed in CI (lint and build only).
 
 ## Troubleshooting
 
+### "Using demo data" message on Tasks/Equipment pages
+
+The frontend retries API calls twice (1.5s apart). If the backend is still unreachable, it shows demo data and a brief "Using demo data" snackbar. Ensure the backend container is running and healthy (`docker compose ps`), and that the frontend proxy targets the correct API URL (check `proxy.conf.json` in dev, `nginx.conf` in prod).
+
 ### Backend container exits: "no such file or directory" (entrypoint)
 
 On Windows, Git may check out shell scripts with CRLF line endings. The backend Dockerfile runs `sed` to strip CRLF from `docker-entrypoint.sh`. `.gitattributes` enforces LF for `*.sh`. If you still see this error, run `git add --renormalize .` and rebuild.
@@ -277,7 +281,7 @@ On Windows, Git may check out shell scripts with CRLF line endings. The backend 
 |---------------|----------------------------|-----------------------------------------------------------------------|
 | **CI/CD Pipeline** | Push/PR to main, develop | Backend: composer, phpunit (SQLite). Frontend: npm ci, lint, build. Docker build both images. (Karma tests run locally only.) |
 | **Smoke Test**    | Push/PR, daily cron, manual | PostgreSQL + backend (`docker-compose.smoke.yml`). Doctrine init, curls `/api/tasks/statistics` and `/api/equipment/statistics`. |
-| **Deploy Oracle VM** | Manual (workflow_dispatch) | Builds images on GitHub, SCPs to VM, uses `docker-compose.prod-images.yml` with MSSQL. |
+| **Deploy Oracle VM** | Manual (workflow_dispatch) | Builds images on GitHub, SCPs to VM, uses `docker-compose.prod-pgsql.yml` with PostgreSQL. Stops containers on 4200/8000 before deploy. Requires ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY. |
 
 Artifacts: `backend-coverage` (clover XML).
 
