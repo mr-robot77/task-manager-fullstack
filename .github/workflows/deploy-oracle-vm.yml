@@ -74,11 +74,13 @@ jobs:
 
             echo "=== Using compose file: $COMPOSE_FILE ==="
 
-            echo "=== BEFORE: containers on port 4200 ==="
-            docker ps -a --filter "publish=4200" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" || true
+            echo "=== BEFORE: containers on 4200, 8000 ==="
+            docker ps -a --filter "publish=4200" --format "{{.Names}} {{.Image}}" 2>/dev/null || true
+            docker ps -a --filter "publish=8000" --format "{{.Names}} {{.Image}}" 2>/dev/null || true
 
-            echo "=== Stopping containers on port 4200 ==="
+            echo "=== Stopping any container on port 4200 or 8000 ==="
             for cid in $(docker ps -q --filter "publish=4200" 2>/dev/null); do docker stop $cid; done || true
+            for cid in $(docker ps -q --filter "publish=8000" 2>/dev/null); do docker stop $cid; done || true
 
             echo "=== Docker compose down ==="
             docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" down || true
