@@ -13,9 +13,8 @@ import { NavbarComponent } from './components/navbar/navbar.component';
     </main>
   `,
   styles: [`
-    main {
-      padding-top: 16px;
-    }
+    main { padding-top: 16px; min-height: calc(100vh - 72px); }
+    @media (max-width: 600px) { main { padding-top: 12px; } }
   `]
 })
 export class AppComponent {

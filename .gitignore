@@ -27,13 +27,15 @@ docker-compose.override.yml
 /frontend/dist/
 /backend/var/
 
-# Archives
+# Archives & temp
 *.tar
 *.tar.gz
 *.zip
+_deploy.zip
+_deploy_tmp/
 
 # JWT keys
 /backend/config/jwt/*.pem
 
-# Deploy temp
-_deploy_tmp/
+# Debug
+debug-*.log

@@ -10,6 +10,9 @@ html, body {
   margin: 0 auto;
   padding: 20px;
 }
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+}
 
 .mat-mdc-snack-bar-container {
   &.error-snackbar {

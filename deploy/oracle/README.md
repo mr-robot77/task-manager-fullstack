@@ -106,5 +106,3 @@ docker compose --env-file deploy/oracle/.env.prod -f deploy/oracle/docker-compos
 - **Backend API:** `http://<VM_PUBLIC_IP>:8000/api`
 
 **Example (Oracle VM):** `http://152.70.53.27:4200` (frontend), `http://152.70.53.27:8000/api` (backend).
-
-For production use with a custom domain, add Nginx or Caddy in front and expose only ports 80/443.

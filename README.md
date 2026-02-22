@@ -155,11 +155,30 @@ Requires `HF_TOKEN` (from [huggingface.co/settings/tokens](https://huggingface.c
 
 ```
 task-manager-fullstack/
-├── backend/          # Symfony API
-├── frontend/         # Angular SPA
-├── deploy/oracle/    # Oracle VM deploy
-├── hf-dashboard/     # Hugging Face Gradio dashboard
-└── .github/workflows/
+├── backend/              # Symfony PHP API
+│   ├── src/
+│   │   ├── Command/      # CLI (app:load-demo-data)
+│   │   ├── Controller/   # REST endpoints
+│   │   ├── Entity/       # Task, Equipment, User
+│   │   └── Repository/
+│   ├── config/
+│   └── Dockerfile
+├── frontend/             # Angular 17 SPA
+│   ├── src/app/
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── interceptors/
+│   └── Dockerfile
+├── deploy/oracle/        # Oracle VM deployment
+│   ├── docker-compose.prod-pgsql.yml
+│   ├── sync-and-deploy.sh
+│   └── README.md
+├── hf-dashboard/         # Gradio dashboard for Hugging Face
+│   ├── app.py
+│   └── deploy_to_hf.py
+├── assets/               # demo.gif
+├── scripts/              # make-demo-gif.mjs
+└── .github/workflows/    # CI, smoke test, deploy
 ```
 
 ---

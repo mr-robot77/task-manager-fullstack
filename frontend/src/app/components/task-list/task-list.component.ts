@@ -67,6 +67,7 @@ const DEMO_TASKS: Task[] = [
       </mat-form-field>
     </div>
 
+    <div class="table-wrapper">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z4 full-width">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
@@ -105,11 +106,18 @@ const DEMO_TASKS: Task[] = [
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    </div>
   `,
   styles: [`
-    .header { display: flex; justify-content: space-between; align-items: center; }
-    .filters { display: flex; gap: 16px; margin: 16px 0; }
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+    .header h1 { font-size: 1.5rem; margin: 0; }
+    .filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
     .full-width { width: 100%; }
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.25rem; }
+      .filters mat-form-field { min-width: 120px; }
+    }
     .chip {
       padding: 4px 10px; border-radius: 12px; font-size: 12px;
       text-transform: uppercase; font-weight: 500;
