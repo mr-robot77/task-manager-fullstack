@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { TaskListComponent } from './components/task-list/task-list.component';
+import { EquipmentListComponent } from './components/equipment-list/equipment-list.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -9,8 +11,7 @@ export const routes: Routes = [
   },
   {
     path: 'tasks',
-    loadComponent: () =>
-      import('./components/task-list/task-list.component').then(m => m.TaskListComponent)
+    component: TaskListComponent
   },
   {
     path: 'tasks/new',
@@ -24,8 +25,7 @@ export const routes: Routes = [
   },
   {
     path: 'equipment',
-    loadComponent: () =>
-      import('./components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent)
+    component: EquipmentListComponent
   },
   {
     path: 'equipment/new',

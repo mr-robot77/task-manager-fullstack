@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
@@ -67,7 +67,7 @@ const DEMO_TASKS: Task[] = [
       </mat-form-field>
     </div>
 
-    <table mat-table [dataSource]="tasks" class="mat-elevation-z4 full-width">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z4 full-width">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
         <td mat-cell *matCellDef="let task">{{ task.title }}</td>
@@ -125,7 +125,7 @@ const DEMO_TASKS: Task[] = [
   `]
 })
 export class TaskListComponent implements OnInit {
-  tasks: Task[] = [];
+  dataSource = new MatTableDataSource<Task>([]);
   filters: TaskFilters = {};
   displayedColumns = ['title', 'status', 'priority', 'productionLine', 'equipment', 'actions'];
 
@@ -136,9 +136,13 @@ export class TaskListComponent implements OnInit {
   }
 
   loadTasks(): void {
+    this.dataSource.data = this.filterDemoTasks();
     this.taskService.getTasks(this.filters).subscribe({
-      next: (tasks) => this.tasks = tasks?.length ? tasks : this.filterDemoTasks(),
-      error: () => this.tasks = this.filterDemoTasks(),
+      next: (tasks) => {
+        const list = Array.isArray(tasks) && tasks.length > 0 ? tasks : this.filterDemoTasks();
+        this.dataSource.data = list;
+      },
+      error: () => this.dataSource.data = this.filterDemoTasks(),
     });
   }
 

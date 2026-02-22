@@ -19,6 +19,8 @@ const ROOT = join(__dirname, '..');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:4200';
 const PAGES = ['/dashboard', '/tasks', '/equipment'];
 const VIEWPORT = { width: 1280, height: 720 };
+const CROP_BOTTOM_PX = 80;
+const OUTPUT_HEIGHT = VIEWPORT.height - CROP_BOTTOM_PX;
 const FRAME_DELAY_MS = 800;
 const TEMP_DIR = join(ROOT, '.demo-gif-temp');
 const OUT_FILE = join(ROOT, 'assets', 'demo.gif');
@@ -45,13 +47,17 @@ async function main() {
       console.log('Capturing', url);
       await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
       await page.waitForTimeout(1500);
-      await page.screenshot({ path: fp, type: 'png' });
+      await page.screenshot({
+        path: fp,
+        type: 'png',
+        clip: { x: 0, y: 0, width: VIEWPORT.width, height: OUTPUT_HEIGHT }
+      });
     }
 
     await browser.close();
 
     const globPattern = join(TEMP_DIR, 'frame*.png').replace(/\\/g, '/');
-    const encoder = new GIFEncoder(VIEWPORT.width, VIEWPORT.height);
+    const encoder = new GIFEncoder(VIEWPORT.width, OUTPUT_HEIGHT);
 
     await new Promise((resolve, reject) => {
       pngFileStream(globPattern)

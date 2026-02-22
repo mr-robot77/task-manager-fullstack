@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
@@ -70,7 +70,7 @@ const DEMO_EQUIPMENT: Equipment[] = [
       </mat-form-field>
     </div>
 
-    <table mat-table [dataSource]="equipment" class="mat-elevation-z4 full-width">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z4 full-width">
       <ng-container matColumnDef="code">
         <th mat-header-cell *matHeaderCellDef>Code</th>
         <td mat-cell *matCellDef="let item">{{ item.code }}</td>
@@ -136,7 +136,7 @@ const DEMO_EQUIPMENT: Equipment[] = [
   `]
 })
 export class EquipmentListComponent implements OnInit {
-  equipment: Equipment[] = [];
+  dataSource = new MatTableDataSource<Equipment>([]);
   filters: EquipmentFilters = {};
   displayedColumns = ['code', 'name', 'type', 'status', 'productionLine', 'nextMaintenanceAt', 'actions'];
 
@@ -147,9 +147,13 @@ export class EquipmentListComponent implements OnInit {
   }
 
   loadEquipment(): void {
+    this.dataSource.data = this.filterDemoEquipment();
     this.equipmentService.getEquipmentList(this.filters).subscribe({
-      next: (items) => this.equipment = items?.length ? items : this.filterDemoEquipment(),
-      error: () => this.equipment = this.filterDemoEquipment(),
+      next: (items) => {
+        const list = Array.isArray(items) && items.length > 0 ? items : this.filterDemoEquipment();
+        this.dataSource.data = list;
+      },
+      error: () => this.dataSource.data = this.filterDemoEquipment(),
     });
   }
 

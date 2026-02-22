@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { retry, timer } from 'rxjs';
+import { retry, throwError, timeout, timer } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Task {
@@ -57,7 +57,11 @@ export class TaskService {
     if (filters?.priority) params = params.set('priority', filters.priority);
     if (filters?.productionLine) params = params.set('productionLine', filters.productionLine);
     return this.http.get<Task[]>(this.apiUrl, { params }).pipe(
-      retry({ count: 4, delay: () => timer(2000) })
+      timeout(2500),
+      retry({
+        count: 1,
+        delay: (err) => (err?.status >= 400 && err?.status < 500 ? throwError(() => err) : timer(400))
+      })
     );
   }
 
@@ -79,7 +83,10 @@ export class TaskService {
 
   getStatistics(): Observable<TaskStatistics> {
     return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`).pipe(
-      retry({ count: 4, delay: () => timer(2000) })
+      retry({
+        count: 2,
+        delay: (err) => (err?.status >= 400 && err?.status < 500 ? throwError(() => err) : timer(600))
+      })
     );
   }
 }

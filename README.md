@@ -12,7 +12,7 @@
   </a>
 </p>
 
-A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Microsoft SQL Server**, fully containerized with **Docker**.
+A full-stack web application for managing production line tasks and equipment in semiconductor manufacturing environments. Built with **Symfony (PHP)**, **Angular**, and **Docker** (PostgreSQL or MSSQL).
 
 ---
 
@@ -28,13 +28,10 @@ A full-stack web application for managing production line tasks and equipment in
 
 ![Dashboard Demo](assets/demo.gif)
 
-> **To regenerate the GIF:** Run the app (`docker compose up`), then:
-> ```bash
-> npm install
-> npx playwright install chromium
-> npm run make-demo-gif
-> ```
-> Or with a remote URL: `BASE_URL=http://your-vm-ip:4200 npm run make-demo-gif`
+> **To regenerate:** Requires Node.js (root `package.json`). Run `npm install`, `npx playwright install chromium`, then:
+> - **Local:** `docker compose up` then `npm run make-demo-gif`
+> - **Oracle VM:** `$env:BASE_URL="http://152.70.53.27:4200"; npm run make-demo-gif` (PowerShell) or `BASE_URL=http://152.70.53.27:4200 npm run make-demo-gif` (Bash)
+> The GIF script (`scripts/make-demo-gif.mjs`) captures Dashboard, Tasks, Equipment; crops 80px from the bottom. Uses Playwright Chromium, gifencoder, png-file-stream.
 
 ---
 
@@ -56,8 +53,8 @@ A full-stack web application for managing production line tasks and equipment in
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Angular SPA served by Nginx (prod) or ng serve (dev). Proxies `/api` to backend. |
-| **Backend** | PHP built-in server (dev) or same in container. JWT auth via `lexik/jwt-authentication-bundle`. |
+| **Frontend** | Angular 17 SPA (standalone components). Served by Nginx in Docker (port 80→4200) or `ng serve` (dev). Proxies `/api` to backend. Tasks and Equipment routes are eager-loaded for fast navigation. |
+| **Backend** | Symfony PHP API. PHP built-in server (dev) or same in container. JWT auth via `lexik/jwt-authentication-bundle`. |
 | **Database** | MSSQL primary; PostgreSQL supported for demo deployments (see below). |
 
 ---
@@ -79,9 +76,9 @@ A full-stack web application for managing production line tasks and equipment in
 
 | Option | RAM | Compose File | Use Case |
 |--------|-----|--------------|----------|
-| **MSSQL** | ≥2GB | default | Production & local dev |
-| **PostgreSQL** | ~512MB | `docker-compose.smoke.yml` | Smoke test, MCR auth fallback |
-| **PostgreSQL** | ~1GB | `deploy/oracle/docker-compose.prod-pgsql.yml` | Oracle Always Free VM (1GB RAM) |
+| **PostgreSQL** | ~512MB | `docker-compose.yml` (default) | Local dev, Windows-friendly |
+| **MSSQL** | ≥2GB | `docker-compose.mssql.yml` | Production, when MSSQL preferred |
+| **PostgreSQL** | ~1GB | `deploy/oracle/docker-compose.prod-pgsql.yml` | Oracle Always Free VM |
 
 ---
 
@@ -143,9 +140,9 @@ On first `docker compose up`, the backend automatically:
 - Generates JWT keys
 - Loads demo data (9 tasks, 7 equipment)
 
-**Demo login:** `demo@example.com` / `demodemo` — frontend auto-authenticates on first visit.
+**Demo login:** `demo@example.com` / `demodemo` — frontend auto-authenticates on first visit via `APP_INITIALIZER` (calls demo login if no token exists).
 
-If the backend is unreachable, the frontend retries (4×, 2s delay) and silently shows built-in demo data.
+If the backend is unreachable, the frontend shows demo data immediately (optimistic loading). API calls use a 2.5s timeout and 1 retry (400ms); 4xx errors skip retries. When the API succeeds, data is replaced with live results.
 
 ---
 
@@ -174,18 +171,20 @@ See `deploy/oracle/README.md`. The GitHub Actions workflow uses PostgreSQL (`doc
 ### 2) Deploy Dashboard to Hugging Face
 
 ```bash
-cd hf-dashboard
-python deploy_to_hf.py   # requires HF_TOKEN or huggingface-cli login
+pip install huggingface_hub
+python hf-dashboard/deploy_to_hf.py   # from project root; requires HF_TOKEN or huggingface-cli login
 ```
 
-The script uploads files, sets `BACKEND_API_BASE`, and resolves variable/secret collisions.
+Set `$env:HF_TOKEN="hf_xxx"` (PowerShell) or `HF_TOKEN=hf_xxx` (Bash). The script uploads files and sets `BACKEND_API_BASE` to the Oracle VM.
 
 ### Manual Commands
 
 ```bash
 docker compose exec backend php bin/console doctrine:schema:update --force
-docker compose exec backend php bin/console app:load-demo-data --force
+docker compose exec backend php bin/console app:load-demo-data --no-interaction
 ```
+
+Use `--force` with `app:load-demo-data` to add more demo tasks/equipment when the demo user already exists.
 
 ---
 
@@ -243,11 +242,12 @@ task-manager-fullstack/
 │   ├── config/
 │   ├── docker-entrypoint.sh
 │   └── Dockerfile
-├── frontend/                   # Angular SPA
+├── frontend/                   # Angular SPA (standalone)
 │   ├── src/app/
-│   │   ├── components/         # Dashboard, tasks, equipment
-│   │   ├── services/
-│   │   └── interceptors/      # JWT header
+│   │   ├── components/         # Dashboard, task-list, equipment-list, forms, login
+│   │   ├── services/           # task.service, equipment.service, auth.service
+│   │   └── interceptors/       # JWT auth header
+│   ├── nginx.conf              # Prod: proxy /api to backend
 │   └── Dockerfile
 ├── deploy/oracle/              # Oracle VM deploy
 │   ├── docker-compose.prod-pgsql.yml
@@ -255,7 +255,8 @@ task-manager-fullstack/
 ├── hf-dashboard/               # Hugging Face Gradio
 │   ├── app.py
 │   └── deploy_to_hf.py
-├── assets/                     # demo.gif (npm run make-demo-gif)
+├── assets/                     # demo.gif
+├── package.json                # Root: make-demo-gif script (gifencoder, playwright)
 ├── scripts/make-demo-gif.mjs
 └── .github/workflows/
 ```
@@ -294,9 +295,9 @@ cd frontend && npm run test:ci
 
 | Issue | Solution |
 |-------|----------|
-| **Demo data instead of live API** | Ensure backend is running (`docker compose ps`). Frontend retries 4× with 2s delay, then falls back to demo data. |
-| **Backend exits: "no such file or directory"** | CRLF line endings on Windows. Run `git add --renormalize .` and rebuild. |
-| **Oracle VM shows zeros** | Pull latest code and run `./deploy/oracle/sync-and-deploy.sh` on the VM. |
+| **Demo data instead of live API** | Ensure backend is healthy (`docker compose ps`). Frontend shows demo data immediately; API has 2.5s timeout and 1 retry before staying on demo. |
+| **Oracle VM: demo data or zeros** | Redeploy with latest code. Run `./deploy/oracle/sync-and-deploy.sh` on the VM. Ensure backend container is healthy. |
+| **Backend exits: "no such file or directory"** | CRLF on Windows. Run `git add --renormalize .` and rebuild. |
 
 ---
 
