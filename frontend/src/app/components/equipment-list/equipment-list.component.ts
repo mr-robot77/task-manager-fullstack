@@ -149,10 +149,7 @@ export class EquipmentListComponent implements OnInit {
   loadEquipment(): void {
     this.equipmentService.getEquipmentList(this.filters).subscribe({
       next: (items) => this.equipment = items?.length ? items : this.filterDemoEquipment(),
-      error: () => {
-        this.equipment = this.filterDemoEquipment();
-        this.snackBar.open('Using demo data', 'Close', { duration: 2000 });
-      },
+      error: () => this.equipment = this.filterDemoEquipment(),
     });
   }
 

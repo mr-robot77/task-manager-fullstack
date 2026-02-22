@@ -149,139 +149,157 @@ const DEMO_EQUIPMENT_STATS: EquipmentStatistics = {
   `,
   styles: [`
     .dashboard {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 24px 16px;
-      font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+      padding: 16px 12px;
+      font-family: 'Roboto', system-ui, sans-serif;
     }
     .dashboard-header {
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
     .dashboard-header h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 600;
-      color: #1a1a2e;
-      margin: 0 0 4px 0;
+      color: #111;
+      margin: 0 0 2px 0;
       letter-spacing: -0.02em;
     }
     .dashboard-subtitle {
-      font-size: 0.9375rem;
-      color: #64748b;
+      font-size: 0.875rem;
+      color: #666;
       margin: 0;
     }
     .section-title {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 1.125rem;
+      gap: 6px;
+      font-size: 1rem;
       font-weight: 600;
-      color: #334155;
-      margin: 0 0 16px 0;
+      color: #333;
+      margin: 0 0 12px 0;
     }
     .section-title mat-icon {
-      font-size: 22px;
-      width: 22px;
-      height: 22px;
-      color: #6366f1;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #555;
     }
     .section-tasks, .section-equipment {
-      margin-bottom: 40px;
+      margin-bottom: 32px;
     }
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
     }
     .kpi-card {
       background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      border: 1px solid #e2e8f0;
-      transition: box-shadow 0.2s;
-    }
-    .kpi-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 14px;
+      border: 1px solid #eee;
     }
     .kpi-primary {
-      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      background: #111;
       color: #fff;
       border: none;
     }
-    .kpi-primary .kpi-label { color: rgba(255,255,255,0.9); }
+    .kpi-primary .kpi-label { color: rgba(255,255,255,0.85); }
     .kpi-value {
       display: block;
-      font-size: 1.875rem;
+      font-size: 1.5rem;
       font-weight: 700;
       line-height: 1.2;
-      color: #1a1a2e;
+      color: #111;
     }
     .kpi-label {
-      font-size: 0.8125rem;
-      color: #64748b;
-      margin-top: 4px;
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 2px;
     }
-    .kpi-card.status-todo { border-left: 4px solid #3b82f6; }
-    .kpi-card.status-in_progress { border-left: 4px solid #f59e0b; }
-    .kpi-card.status-review { border-left: 4px solid #8b5cf6; }
-    .kpi-card.status-done { border-left: 4px solid #22c55e; }
-    .kpi-card.priority-critical { border-left: 4px solid #ef4444; }
-    .kpi-card.priority-high { border-left: 4px solid #f59e0b; }
-    .kpi-card.priority-medium { border-left: 4px solid #3b82f6; }
-    .kpi-card.priority-low { border-left: 4px solid #22c55e; }
-    .kpi-card.equipment-available { border-left: 4px solid #22c55e; }
-    .kpi-card.equipment-in_use { border-left: 4px solid #3b82f6; }
-    .kpi-card.equipment-maintenance { border-left: 4px solid #f59e0b; }
-    .kpi-card.equipment-offline { border-left: 4px solid #ef4444; }
+    .kpi-card.status-todo { border-left: 3px solid #3b82f6; }
+    .kpi-card.status-in_progress { border-left: 3px solid #f59e0b; }
+    .kpi-card.status-review { border-left: 3px solid #8b5cf6; }
+    .kpi-card.status-done { border-left: 3px solid #22c55e; }
+    .kpi-card.equipment-available { border-left: 3px solid #22c55e; }
+    .kpi-card.equipment-in_use { border-left: 3px solid #3b82f6; }
+    .kpi-card.equipment-maintenance { border-left: 3px solid #f59e0b; }
+    .kpi-card.equipment-offline { border-left: 3px solid #ef4444; }
     .breakdown-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
     }
     .breakdown-card {
       background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #eee;
     }
     .breakdown-card h3 {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #64748b;
+      color: #666;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 0 0 16px 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e2e8f0;
+      letter-spacing: 0.04em;
+      margin: 0 0 12px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #eee;
     }
     .breakdown-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
     .breakdown-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 12px;
-      background: #f8fafc;
-      border-radius: 8px;
+      padding: 6px 10px;
+      background: #fafafa;
+      border-radius: 6px;
     }
     .breakdown-label {
-      font-size: 0.9375rem;
-      color: #334155;
+      font-size: 0.875rem;
+      color: #333;
     }
     .breakdown-value {
-      font-size: 1rem;
+      font-size: 0.9375rem;
       font-weight: 600;
-      color: #1a1a2e;
+      color: #111;
     }
     .breakdown-item.priority-critical .breakdown-value { color: #ef4444; }
     .breakdown-item.priority-high .breakdown-value { color: #f59e0b; }
     .breakdown-item.priority-medium .breakdown-value { color: #3b82f6; }
     .breakdown-item.priority-low .breakdown-value { color: #22c55e; }
+
+    @media (max-width: 600px) {
+      .dashboard { padding: 12px 10px; }
+      .dashboard-header h1 { font-size: 1.25rem; }
+      .dashboard-subtitle { font-size: 0.8125rem; }
+      .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .kpi-card { padding: 12px; }
+      .kpi-value { font-size: 1.25rem; }
+      .kpi-label { font-size: 0.7rem; }
+      .breakdown-grid { grid-template-columns: 1fr; gap: 12px; }
+      .breakdown-card { padding: 12px; }
+      .section-tasks, .section-equipment { margin-bottom: 24px; }
+    }
+
+    @media (min-width: 601px) and (max-width: 960px) {
+      .dashboard { padding: 18px 14px; }
+      .kpi-row { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+      .breakdown-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 961px) {
+      .dashboard { padding: 24px 20px; }
+      .dashboard-header h1 { font-size: 1.75rem; }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {

@@ -1,0 +1,12 @@
+{
+  "name": "task-manager-fullstack",
+  "private": true,
+  "scripts": {
+    "make-demo-gif": "node scripts/make-demo-gif.mjs"
+  },
+  "devDependencies": {
+    "gifencoder": "^2.0.1",
+    "playwright": "^1.49.0",
+    "png-file-stream": "^1.2.1"
+  }
+}

@@ -57,7 +57,7 @@ export class TaskService {
     if (filters?.priority) params = params.set('priority', filters.priority);
     if (filters?.productionLine) params = params.set('productionLine', filters.productionLine);
     return this.http.get<Task[]>(this.apiUrl, { params }).pipe(
-      retry({ count: 2, delay: () => timer(1500) })
+      retry({ count: 4, delay: () => timer(2000) })
     );
   }
 
@@ -78,6 +78,8 @@ export class TaskService {
   }
 
   getStatistics(): Observable<TaskStatistics> {
-    return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`);
+    return this.http.get<TaskStatistics>(`${this.apiUrl}/statistics`).pipe(
+      retry({ count: 4, delay: () => timer(2000) })
+    );
   }
 }

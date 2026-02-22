@@ -138,10 +138,7 @@ export class TaskListComponent implements OnInit {
   loadTasks(): void {
     this.taskService.getTasks(this.filters).subscribe({
       next: (tasks) => this.tasks = tasks?.length ? tasks : this.filterDemoTasks(),
-      error: () => {
-        this.tasks = this.filterDemoTasks();
-        this.snackBar.open('Using demo data', 'Close', { duration: 2000 });
-      },
+      error: () => this.tasks = this.filterDemoTasks(),
     });
   }
 

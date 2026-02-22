@@ -48,7 +48,7 @@ export class EquipmentService {
     if (filters?.type) params = params.set('type', filters.type);
     if (filters?.productionLine) params = params.set('productionLine', filters.productionLine);
     return this.http.get<Equipment[]>(this.apiUrl, { params }).pipe(
-      retry({ count: 2, delay: () => timer(1500) })
+      retry({ count: 4, delay: () => timer(2000) })
     );
   }
 
@@ -69,6 +69,8 @@ export class EquipmentService {
   }
 
   getStatistics(): Observable<EquipmentStatistics> {
-    return this.http.get<EquipmentStatistics>(`${this.apiUrl}/statistics`);
+    return this.http.get<EquipmentStatistics>(`${this.apiUrl}/statistics`).pipe(
+      retry({ count: 4, delay: () => timer(2000) })
+    );
   }
 }
