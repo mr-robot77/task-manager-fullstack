@@ -1,5 +1,5 @@
-# PostgreSQL (DEMO ONLY) - fallback for VMs with 1GB RAM where MSSQL cannot run.
-# Primary database is MSSQL; use docker-compose.prod.yml for production.
+# PostgreSQL - for Oracle Always Free (1GB RAM). MSSQL needs 2GB+.
+name: taskmanager-prod
 services:
   database:
     image: postgres:15-alpine

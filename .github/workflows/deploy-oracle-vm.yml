@@ -1,7 +1,7 @@
 name: Deploy to Oracle VM
 
-# Builds images on GitHub (no Docker Hub needed on VM), SCPs to VM, loads and runs.
-# Requires: ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY
+# Builds images on GitHub, SCPs to VM, loads and runs. Uses PostgreSQL (1GB RAM).
+# MSSQL needs 2GB+; Oracle Always Free has 1GB. Requires: ORACLE_VM_HOST, ORACLE_VM_USER, ORACLE_VM_SSH_KEY
 on:
   workflow_dispatch:
 
@@ -21,14 +21,12 @@ jobs:
           BUILD_VER=$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M)
           docker build --no-cache --build-arg BUILD_VERSION="$BUILD_VER" -t oracle-frontend:latest ./frontend
 
-      - name: Pull MSSQL image
-        run: |
-          docker logout mcr.microsoft.com 2>/dev/null || true
-          docker pull mcr.microsoft.com/mssql/server:2019-latest
+      - name: Pull PostgreSQL image
+        run: docker pull postgres:15-alpine
 
       - name: Save images to tarball
         run: |
-          docker save -o images.tar oracle-backend:latest oracle-frontend:latest mcr.microsoft.com/mssql/server:2019-latest
+          docker save -o images.tar oracle-backend:latest oracle-frontend:latest postgres:15-alpine
           chmod a+r images.tar
 
       - name: Prepare remote directory
@@ -70,8 +68,8 @@ jobs:
             cd ~/task-manager-fullstack
             mkdir -p deploy/oracle
             [ -f deploy/oracle/.env.prod ] || cp deploy/oracle/.env.prod.example deploy/oracle/.env.prod 2>/dev/null || touch deploy/oracle/.env.prod
-            COMPOSE_FILE="deploy/oracle/docker-compose.prod-images.yml"
-            [ -f "$COMPOSE_FILE" ] || COMPOSE_FILE="docker-compose.prod-images.yml"
+            COMPOSE_FILE="deploy/oracle/docker-compose.prod-pgsql.yml"
+            [ -f "$COMPOSE_FILE" ] || COMPOSE_FILE="docker-compose.prod-pgsql.yml"
             [ -f "$COMPOSE_FILE" ] || { echo "ERROR: No compose file. Listing:"; ls -laR; exit 1; }
 
             echo "=== Using compose file: $COMPOSE_FILE ==="
@@ -89,7 +87,7 @@ jobs:
             docker load -i ~/images.tar
             docker images oracle-frontend:latest --format "{{.ID}} {{.CreatedAt}}"
 
-            echo "=== Docker compose up (database needs ~90s to become healthy) ==="
+            echo "=== Docker compose up (PostgreSQL for 1GB RAM VMs) ==="
             if ! docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" up -d --force-recreate; then
               echo "=== Compose up failed. Database logs: ==="
               docker logs taskmanager-prod-database-1 --tail 50 2>&1 || true
@@ -98,8 +96,8 @@ jobs:
               exit 1
             fi
 
-            echo "=== Waiting 180s for backend+frontend ==="
-            sleep 180
+            echo "=== Waiting 120s for backend+frontend ==="
+            sleep 120
 
             docker compose --env-file deploy/oracle/.env.prod -f "$COMPOSE_FILE" exec -T backend php bin/console app:load-demo-data --no-interaction || true
 
