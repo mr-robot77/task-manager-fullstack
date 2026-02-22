@@ -114,10 +114,10 @@ cd task-manager-fullstack
 docker compose up --build
 ```
 
-**If MSSQL image fails to pull** (MCR auth required):
+The default `docker-compose.yml` uses **PostgreSQL** (reliable on Windows/Docker Desktop). For MSSQL, use:
 
 ```bash
-docker compose -f docker-compose.smoke.yml up --build
+docker compose -f docker-compose.mssql.yml up --build
 ```
 
 Wait for the backend healthcheck (~90 seconds). Then:
@@ -133,7 +133,7 @@ Wait for the backend healthcheck (~90 seconds). Then:
 |---------|------|-------------|
 | Frontend | 4200 | Angular SPA (Nginx in Docker) |
 | Backend | 8000 | Symfony API |
-| MSSQL | 1433 | Database (PostgreSQL: 5432) |
+| Database | 5432 | PostgreSQL (default); MSSQL uses 1433 |
 
 ### Demo Data
 
