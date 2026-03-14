@@ -38,6 +38,9 @@ A full-stack web application for managing production line tasks and equipment in
 
 ![Dashboard Demo](assets/demo.gif)
 
+## Hugging Face dashboard live
+
+![hf Dashboard live](assets/huggingface-dashboard-live.jpeg)
 ---
 
 ## Quick Start
